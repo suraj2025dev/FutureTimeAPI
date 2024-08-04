@@ -1,0 +1,19 @@
+﻿{
+  "App": {
+    "Database": {
+      "HOST": "localhost",
+      "PORT": 5432,
+      "NAME": "future_time",
+      "PASSWORD": "12345"
+    },
+    "Email": {
+      "Host": "smtp.gmail.com",
+      "Port": 587,
+      "Password": "qdwr xuax spkn iehk", //have to change this passqword according to the device|| for now static app password of below email
+      "Mail": "sabinbadal98@gmail.com", //email through which the mail is being sent
+      "SecureSocketOptions": 3,
+      "SenderName": "Application Base"
+    },
+    "SessionTimeOut": 10
+  }
+}
