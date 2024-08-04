@@ -7,8 +7,14 @@
     public class APP
     {
         public Database Database { get; set; }
+        public MongoDB MongoDB { get; set; }
         public Email Email { get; set; }
         public int SessionTimeOut { get; set; }
+    }
+    public class MongoDB
+    {
+        public string ConnectionURL { get; set; }
+        public string DatabaseName { get; set; }
     }
     public class Database
     {

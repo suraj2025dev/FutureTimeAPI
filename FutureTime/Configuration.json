@@ -6,6 +6,10 @@
       "NAME": "future_time",
       "PASSWORD": "12345"
     },
+    "MongoDB": {
+      "ConnectionURL": "mongodb://localhost:27017",
+      "DatabaseName": "FutureTime"
+    },
     "Email": {
       "Host": "smtp.gmail.com",
       "Port": 587,
