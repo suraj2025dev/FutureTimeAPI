@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Library.Parameters;
+using MongoDB.Driver;
 
 namespace Library.Extensions
 {
@@ -100,13 +101,25 @@ namespace Library.Extensions
         {
             string sql = @"
             INSERT INTO public.tbl_error_log(guid,exception)
-            VALUES(@guid,@exception)
+            VALUES(@guid,@exception::jsonb)
 ";
-            Dao.Execute(sql, new
+            try
             {
-                guid = guid.ToString(),
-                exception = new JsonParameter(ex)
-            });
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new IPAddressConverter());
+
+                
+                Dao.Execute(sql, new
+                {
+                    guid = guid.ToString(),
+                    exception = JsonConvert.SerializeObject(ex, settings)
+                });
+                
+            }
+            catch (Exception ex1)
+            {
+
+            }
         }
 
         public static void WriteInLog(this Exception ex)
