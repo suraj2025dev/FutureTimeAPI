@@ -17,7 +17,8 @@ namespace FutureTime.MongoDB
         public enum COLLECTION_NAME
         {
             DailyKundaliUpdates,
-            UsersModel
+            UsersModel,
+            QuestionCategoryModel
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)

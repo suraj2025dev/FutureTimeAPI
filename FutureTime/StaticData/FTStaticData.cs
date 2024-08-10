@@ -8,7 +8,8 @@
     public enum STATIC_DATA_TYPE
     {
         RASHI,
-        USER_TYPE
+        USER_TYPE,
+        CATEGORY_TYPE
     }
 
     public class StaticData

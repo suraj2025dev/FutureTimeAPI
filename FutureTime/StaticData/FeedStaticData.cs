@@ -103,6 +103,46 @@
                 }
             });
             #endregion
+
+            #region CATEGORY TYPE
+            FTStaticData.data.Add(new StaticData
+            {
+                type = STATIC_DATA_TYPE.CATEGORY_TYPE,
+                list = new List<StaticDataList>
+                {
+                    new StaticDataList
+                    {
+                        id = "1",
+                        name = "Horosope"
+                    },
+                    new StaticDataList
+                    {
+                        id = "2",
+                        name = "Compatibility"
+                    },
+                    new StaticDataList
+                    {
+                        id = "3",
+                        name = "Auspicious Time"
+                    },
+                    new StaticDataList
+                    {
+                        id = "4",
+                        name = "Kundali"
+                    },
+                    new StaticDataList
+                    {
+                        id = "5",
+                        name = "Support"
+                    },
+                    new StaticDataList
+                    {
+                        id = "6",
+                        name = "Question"
+                    },
+                }
+            });
+            #endregion
         }
     }
 }
