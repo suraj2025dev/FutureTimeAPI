@@ -17,13 +17,13 @@ using MongoDB.Bson;
 
 namespace FutureTime.Controllers.Backend
 {
-    [Route("[controller]")]
-    public class DailyRashiUpdatesController : ControllerBase
+    [Route("backend/[controller]")]
+    public class DailyAuspiciousTimeUpdateController : ControllerBase
     {
         ApplicationResponse response;
         ApplicationRequest request;
 
-        public DailyRashiUpdatesController(IHttpContextAccessor httpContextAccessor)
+        public DailyAuspiciousTimeUpdateController(IHttpContextAccessor httpContextAccessor)
         {
             response = new ApplicationResponse();
             request = new ApplicationRequest();
@@ -34,11 +34,11 @@ namespace FutureTime.Controllers.Backend
         [AnonymousAuthorizeFilter]
         [HttpPost]
         [Route("create")]
-        public IActionResult Insert([FromBody] DailyKundaliUpdatesModel data)
+        public IActionResult Insert([FromBody] DailyAuspiciousTimeUpdateModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel);
 
                 data._id = null;
                 DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
@@ -49,7 +49,7 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("transaction_date", data.transaction_date);
+                var filter = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("transaction_date", data.transaction_date);
                 var document = col.Find(filter).FirstOrDefault();
 
                 if (document != null)
@@ -69,7 +69,7 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 col.InsertOne(data);
-                response.message = "Daily Rashi Updates saved for the day.";
+                response.message = "Daily Auspicious Time Updates saved for the day.";
             }
             catch (Exception ex)
             {
@@ -102,11 +102,11 @@ namespace FutureTime.Controllers.Backend
         [AnonymousAuthorizeFilter]
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] DailyKundaliUpdatesModel data)
+        public async Task<IActionResult> UpdateAsync([FromBody] DailyAuspiciousTimeUpdateModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel);
 
                 //data.id = null;
                 DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
@@ -135,10 +135,10 @@ namespace FutureTime.Controllers.Backend
                 var id = new ObjectId(data._id);
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", id);
+                var filter = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("_id", id);
                 //var result = await col.UpdateOneAsync(filter,data.ToBsonDocument());
 
-                var update = Builders<DailyKundaliUpdatesModel>.Update.Set("items", data.items);
+                var update = Builders<DailyAuspiciousTimeUpdateModel>.Update.Set("items", data.items);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -150,7 +150,7 @@ namespace FutureTime.Controllers.Backend
 
 
                 //col.InsertOne(data);
-                response.message = "Daily Rashi Updates saved for the day.";
+                response.message = "Daily Auspicious Time saved for the day.";
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ namespace FutureTime.Controllers.Backend
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel);
 
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
@@ -191,11 +191,11 @@ namespace FutureTime.Controllers.Backend
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel);
 
                 var obj_id = new ObjectId(id);
 
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", obj_id);
+                var filter = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("_id", obj_id);
                 var item = await col.Find(filter).FirstOrDefaultAsync();
 
                 response.data.Add("item", item);
