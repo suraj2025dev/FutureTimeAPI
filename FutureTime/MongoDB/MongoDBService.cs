@@ -18,7 +18,8 @@ namespace FutureTime.MongoDB
         {
             DailyKundaliUpdates,
             UsersModel,
-            QuestionCategoryModel
+            QuestionCategoryModel,
+            QuestionModel
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)
