@@ -15,10 +15,10 @@ using Library.Exceptions;
 using FutureTime.StaticData;
 using MongoDB.Bson;
 
-namespace FutureTime.Controllers.User
+namespace FutureTime.Controllers.Backend
 {
     [Route("[controller]")]
-    public class DailyRashiUpdatesController : ControllerBase 
+    public class DailyRashiUpdatesController : ControllerBase
     {
         ApplicationResponse response;
         ApplicationRequest request;
@@ -34,37 +34,37 @@ namespace FutureTime.Controllers.User
         [AnonymousAuthorizeFilter]
         [HttpPost]
         [Route("create")]
-        public IActionResult Insert([FromBody]DailyKundaliUpdates data)
+        public IActionResult Insert([FromBody] DailyKundaliUpdatesModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdates>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
+                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
 
                 data._id = null;
-                DateTime.TryParse(data.transaction_date,out DateTime _transaction_date);
+                DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
 
-                if(_transaction_date == DateTime.MinValue)
+                if (_transaction_date == DateTime.MinValue)
                 {
                     throw new ErrorException("Enter valid date i.e yyyy-MM-dd.");
                 }
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdates>.Filter.Eq("transaction_date", data.transaction_date);
+                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("transaction_date", data.transaction_date);
                 var document = col.Find(filter).FirstOrDefault();
-                
-                if (document!=null)
+
+                if (document != null)
                 {
                     throw new ErrorException("Entry of this transaction date is already saved. Please update data from list page.");
                 }
 
-                if(data.items==null || data.items.Count == 0)
+                if (data.items == null || data.items.Count == 0)
                 {
                     throw new ErrorException("Please provide rashi details.");
                 }
 
-                if (data.items.Where(w=>(new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }).Contains(w.rashi_id)).GroupBy(g=>g.rashi_id).Count()!=12)
+                if (data.items.Where(w => new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Contains(w.rashi_id)).GroupBy(g => g.rashi_id).Count() != 12)
                 {
-                    
+
                     throw new ErrorException("Please provide details of all 12 rashi.");
                 }
 
@@ -73,9 +73,9 @@ namespace FutureTime.Controllers.User
             }
             catch (Exception ex)
             {
-                response = ex.GenerateResponse();                
+                response = ex.GenerateResponse();
             }
-            
+
             return Ok(response);
 
         }
@@ -87,7 +87,7 @@ namespace FutureTime.Controllers.User
         {
             try
             {
-                var rashi = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.RASHI).Select(s=>s.list).First();
+                var rashi = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.RASHI).Select(s => s.list).First();
                 response.data.Add("rashi", rashi);
             }
             catch (Exception ex)
@@ -102,11 +102,11 @@ namespace FutureTime.Controllers.User
         [AnonymousAuthorizeFilter]
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] DailyKundaliUpdates data)
+        public async Task<IActionResult> UpdateAsync([FromBody] DailyKundaliUpdatesModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdates>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
+                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
 
                 //data.id = null;
                 DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
@@ -126,7 +126,7 @@ namespace FutureTime.Controllers.User
                     throw new ErrorException("Please provide rashi details.");
                 }
 
-                if (data.items.Where(w => (new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }).Contains(w.rashi_id)).GroupBy(g => g.rashi_id).Count() != 12)
+                if (data.items.Where(w => new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }.Contains(w.rashi_id)).GroupBy(g => g.rashi_id).Count() != 12)
                 {
 
                     throw new ErrorException("Please provide details of all 12 rashi.");
@@ -135,10 +135,10 @@ namespace FutureTime.Controllers.User
                 var id = new ObjectId(data._id);
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdates>.Filter.Eq("_id", id);
+                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", id);
                 //var result = await col.UpdateOneAsync(filter,data.ToBsonDocument());
 
-                var update = Builders<DailyKundaliUpdates>.Update.Set("items", data.items);
+                var update = Builders<DailyKundaliUpdatesModel>.Update.Set("items", data.items);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -147,7 +147,7 @@ namespace FutureTime.Controllers.User
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
 
-                
+
 
                 //col.InsertOne(data);
                 response.message = "Daily Rashi Updates saved for the day.";
@@ -156,7 +156,7 @@ namespace FutureTime.Controllers.User
             {
                 response = ex.GenerateResponse();
             }
-            
+
             return Ok(response);
 
         }
@@ -168,7 +168,7 @@ namespace FutureTime.Controllers.User
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdates>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
+                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
 
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
@@ -191,12 +191,12 @@ namespace FutureTime.Controllers.User
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdates>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
+                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdates);
 
                 var obj_id = new ObjectId(id);
 
-                var filter = Builders<DailyKundaliUpdates>.Filter.Eq("_id", obj_id);
-                var item= await col.Find(filter).FirstOrDefaultAsync();
+                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", obj_id);
+                var item = await col.Find(filter).FirstOrDefaultAsync();
 
                 response.data.Add("item", item);
             }

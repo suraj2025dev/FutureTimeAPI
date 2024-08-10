@@ -121,6 +121,18 @@ if (!result.Successful)
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
+
 //builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 
 builder.Services.AddControllers();
@@ -179,6 +191,9 @@ builder.Services.AddMvc(option => {
 });//.AddNewtonsoftJson();
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
+
 
 // Configure the HTTP request pipeline.
 if (true)

@@ -73,6 +73,36 @@
                 }
             });
             #endregion
+
+            #region USER TYPE
+            FTStaticData.data.Add(new StaticData
+            {
+                type = STATIC_DATA_TYPE.USER_TYPE,
+                list = new List<StaticDataList>
+                {
+                    new StaticDataList
+                {
+                    id = "1",
+                    name = "Admin"
+                },
+                new StaticDataList
+                {
+                    id = "2",
+                    name = "Support"
+                },
+                new StaticDataList
+                {
+                    id = "3",
+                    name = "Translator"
+                },
+                new StaticDataList
+                {
+                    id = "4",
+                    name = "Guru"
+                }
+                }
+            });
+            #endregion
         }
     }
 }
