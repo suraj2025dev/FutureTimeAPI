@@ -15,6 +15,7 @@ namespace FutureTime.MongoDB.Model
         public string email { get; set; }
         public string password { get; set; }
         public int user_type_id { get; set; }
+        public bool active { get; set; }
     }
 
 }

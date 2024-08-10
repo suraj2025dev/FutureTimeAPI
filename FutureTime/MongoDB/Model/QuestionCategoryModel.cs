@@ -14,6 +14,7 @@ namespace FutureTime.MongoDB.Model
         public string category { get; set; }
         public int order_id { get; set; }
         public int category_type_id { get; set; }
+        public bool active { get; set; }
     }
 
 }

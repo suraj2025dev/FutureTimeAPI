@@ -136,6 +136,7 @@ namespace FutureTime.Controllers.Backend
                 var update = Builders<QuestionCategoryModel>.Update
                      .Set(u => u.category_type_id, data.category_type_id)
                      .Set(u => u.category, data.category)
+                     .Set(u => u.active, data.active)
                      .Set(u => u.order_id, data.order_id);
 
                 var result = await col.UpdateOneAsync(filter, update);

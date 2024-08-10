@@ -66,6 +66,11 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please choose valid question category.");
                 }
 
+                if (data.price == null || data.price < 0)
+                {
+                    throw new ErrorException("Please enter valid price.");
+                }
+
                 col.InsertOne(data);
                 response.message = "Question created successfully.";
             }
@@ -141,6 +146,11 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please choose valid question category.");
                 }
 
+                if(data.price == null || data.price < 0)
+                {
+                    throw new ErrorException("Please enter valid price.");
+                }
+
                 var id = new ObjectId(data._id);
 
                 //Check if date already exists
@@ -149,6 +159,8 @@ namespace FutureTime.Controllers.Backend
                 var update = Builders<QuestionModel>.Update
                      .Set(u => u.question, data.question)
                      .Set(u => u.question_category_id, data.question_category_id)
+                     .Set(u => u.active, data.active)
+                     .Set(u => u.price, data.price)
                      .Set(u => u.order_id, data.order_id);
 
                 var result = await col.UpdateOneAsync(filter, update);

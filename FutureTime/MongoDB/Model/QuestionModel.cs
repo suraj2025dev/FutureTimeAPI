@@ -14,6 +14,8 @@ namespace FutureTime.MongoDB.Model
         public string question { get; set; }
         public int order_id { get; set; }
         public string question_category_id { get; set; }
+        public bool active { get; set; }
+        public decimal price { get; set; }
     }
 
 }

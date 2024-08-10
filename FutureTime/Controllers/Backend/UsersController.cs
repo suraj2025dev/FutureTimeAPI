@@ -157,6 +157,7 @@ namespace FutureTime.Controllers.Backend
                     update = Builders<UsersModel>.Update
                      .Set(u => u.name, data.name)
                      .Set(u => u.email, data.email)
+                     .Set(u => u.active, data.active)
                      .Set(u => u.user_type_id, data.user_type_id);
                 }
                 else
@@ -165,6 +166,7 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.name, data.name)
                      .Set(u => u.email, data.email)
                      .Set(u => u.user_type_id, data.user_type_id)
+                     .Set(u => u.active, data.active)
                      .Set(u=>u.password,data.password);
                 }
 
