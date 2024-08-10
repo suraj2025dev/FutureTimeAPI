@@ -91,40 +91,40 @@ namespace AegisService.Lib.Filters
                     else
                     {
                         // perform some business logic work
-                        var myResult = (OkObjectResult)context.Result;
+                        //var myResult = (OkObjectResult)context.Result;
 
-                        //Add type checking here... sample code only
-                        //Modiy object values
-                        try
-                        {
-                            ApplicationResponse response = (ApplicationResponse)myResult.Value;
-                            var continue_request = true;
+                        ////Add type checking here... sample code only
+                        ////Modiy object values
+                        //try
+                        //{
+                        //    ApplicationResponse response = (ApplicationResponse)myResult.Value;
+                        //    var continue_request = true;
 
-                            var token = context.HttpContext.Items["renewed_jwt_token"];
+                        //    var token = context.HttpContext.Items["renewed_jwt_token"];
 
-                            if (token != null)
-                            {
-                                response.data.Add("session_status", new
-                                {
-                                    token = token,
-                                    continue_request = continue_request
-                                });
-                            }
-                            else
-                            {
-                                response.data.Add("session_status", new
-                                {
-                                    continue_request = continue_request
-                                });
-                            }
+                        //    if (token != null)
+                        //    {
+                        //        response.data.Add("session_status", new
+                        //        {
+                        //            token = token,
+                        //            continue_request = continue_request
+                        //        });
+                        //    }
+                        //    else
+                        //    {
+                        //        response.data.Add("session_status", new
+                        //        {
+                        //            continue_request = continue_request
+                        //        });
+                        //    }
 
 
 
-                        }
-                        catch
-                        {
+                        //}
+                        //catch
+                        //{
 
-                        }
+                        //}
                     }
                 }//end if of null checking
 

@@ -9,6 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Library.Exceptions;
+using static System.Net.WebRequestMethods;
+using System.Web.Helpers;
 
 namespace Auth
 {
@@ -22,8 +25,15 @@ namespace Auth
             {
                 var actionAttributes = controllerActionDescriptor.MethodInfo.GetCustomAttributes(inherit: true);
                 if (actionAttributes.Any(a => a is AnonymousAuthorizeFilter)) return null;
-
+                if (actionAttributes.Any(a => a is GuestAuthFilter))
+                {
+                    string token = context.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                    context.HttpContext.Items["guest_token"] = token;
+                    return null;
+                }
             }
+
+            
 
 
             //USER BASED AUTH

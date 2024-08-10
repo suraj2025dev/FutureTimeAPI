@@ -23,6 +23,8 @@ namespace Library.Data
         public string ip_address { get; set; }
         public DateTime ac_date { get; set; }
         public DateTime created_date { get; set; }
+        public string guest_token { get; set; }
+        public string guest_id { get; set; }
 
     }
 }

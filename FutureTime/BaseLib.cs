@@ -1,5 +1,12 @@
-﻿using Library.Data;
+﻿using FutureTime.MongoDB.Model;
+using FutureTime.MongoDB;
+using Library.Data;
+using Library.Exceptions;
 using Microsoft.AspNetCore.Http;
+using MongoDB.Driver;
+using static System.Net.WebRequestMethods;
+using System.Web.Helpers;
+using MongoDB.Bson;
 
 namespace FutureTime
 {
@@ -10,6 +17,27 @@ namespace FutureTime
             request.user_email = GetUserDetail(contextAccessor,"user_email");
             request.user_id = GetUserDetail(contextAccessor,"user_id");
             request.ip_address = GetIPAddress(contextAccessor);
+            return request;
+        }
+
+        public static ApplicationRequest FillGuestSessionAsync(this IHttpContextAccessor contextAccessor, ApplicationRequest request)
+        {
+            request.guest_token = GetUserDetail(contextAccessor, "guest_token");
+            //Get ID From Token
+            var col = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
+
+            try
+            {
+                var filter1 = Builders<GuestsModel>.Filter.Eq("token", Guid.Parse(request.guest_token));
+                var item = col.FindAsync(filter1).Result.FirstOrDefault();
+
+                request.guest_id = item._id;
+                request.ip_address = GetIPAddress(contextAccessor);
+            }
+            catch
+            {
+
+            }
             return request;
         }
 
