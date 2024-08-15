@@ -12,11 +12,10 @@ namespace FutureTime.MongoDB
     public static class MongoDBService
     {
 
-        //private readonly IMongoCollection<DailyKundaliUpdates> dailyKundaliUpdates;
-
+        
         public enum COLLECTION_NAME
         {
-            DailyKundaliUpdatesModel,
+            DailyHoroscopeUpdatesModel,
             UsersModel,
             QuestionCategoryModel,
             QuestionModel,

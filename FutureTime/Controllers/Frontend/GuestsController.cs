@@ -442,9 +442,9 @@ namespace FutureTime.Controllers.Backend
                     var filter_com = Builders<DailyCompatibilityUpdateModel>.Filter.Eq("transaction_date", date);
                     var item_com = await col_com.Find(filter_com).FirstOrDefaultAsync();
 
-                    var col_kun = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                    var col_kun = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
-                    var filter_kun = Builders<DailyKundaliUpdatesModel>.Filter.Eq("transaction_date", date);
+                    var filter_kun = Builders<DailyHoroscopeUpdatesModel>.Filter.Eq("transaction_date", date);
                     var item_kun = await col_kun.Find(filter_kun).FirstOrDefaultAsync();
 
                     response.data.Add("horoscope", item_kun==null?null:item_kun.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());

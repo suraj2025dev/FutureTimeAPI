@@ -34,11 +34,11 @@ namespace FutureTime.Controllers.Backend
         
         [HttpPost]
         [Route("create")]
-        public IActionResult Insert([FromBody] DailyKundaliUpdatesModel data)
+        public IActionResult Insert([FromBody] DailyHoroscopeUpdatesModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
                 data._id = null;
                 DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
@@ -49,7 +49,7 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("transaction_date", data.transaction_date);
+                var filter = Builders<DailyHoroscopeUpdatesModel>.Filter.Eq("transaction_date", data.transaction_date);
                 var document = col.Find(filter).FirstOrDefault();
 
                 if (document != null)
@@ -102,11 +102,11 @@ namespace FutureTime.Controllers.Backend
         
         [HttpPost]
         [Route("Update")]
-        public async Task<IActionResult> UpdateAsync([FromBody] DailyKundaliUpdatesModel data)
+        public async Task<IActionResult> UpdateAsync([FromBody] DailyHoroscopeUpdatesModel data)
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
                 //data.id = null;
                 DateTime.TryParse(data.transaction_date, out DateTime _transaction_date);
@@ -135,10 +135,10 @@ namespace FutureTime.Controllers.Backend
                 var id = new ObjectId(data._id);
 
                 //Check if date already exists
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", id);
+                var filter = Builders<DailyHoroscopeUpdatesModel>.Filter.Eq("_id", id);
                 //var result = await col.UpdateOneAsync(filter,data.ToBsonDocument());
 
-                var update = Builders<DailyKundaliUpdatesModel>.Update.Set("items", data.items);
+                var update = Builders<DailyHoroscopeUpdatesModel>.Update.Set("items", data.items);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -168,7 +168,7 @@ namespace FutureTime.Controllers.Backend
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
@@ -191,11 +191,11 @@ namespace FutureTime.Controllers.Backend
         {
             try
             {
-                var col = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+                var col = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
                 var obj_id = new ObjectId(id);
 
-                var filter = Builders<DailyKundaliUpdatesModel>.Filter.Eq("_id", obj_id);
+                var filter = Builders<DailyHoroscopeUpdatesModel>.Filter.Eq("_id", obj_id);
                 var item = await col.Find(filter).FirstOrDefaultAsync();
 
                 response.data.Add("item", item);

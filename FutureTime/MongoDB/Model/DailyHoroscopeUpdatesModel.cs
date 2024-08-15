@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FutureTime.MongoDB.Model
 {
-    public class DailyKundaliUpdatesModel
+    public class DailyHoroscopeUpdatesModel
     {
         //[BsonElement("items")]
         //[JsonPropertyName("items")]
@@ -13,10 +13,10 @@ namespace FutureTime.MongoDB.Model
         public string? _id { get; set; }
 
         public string transaction_date { get; set; }
-        public List<DailyKundaliUpdatesDetail> items { get; set; }
+        public List<DailyHoroscopeUpdatesDetail> items { get; set; }
     }
 
-    public class DailyKundaliUpdatesDetail
+    public class DailyHoroscopeUpdatesDetail
     {
         public int rashi_id { get; set; }
 
