@@ -18,6 +18,6 @@
       "SecureSocketOptions": 3,
       "SenderName": "Future TIme"
     },
-    "SessionTimeOut": 10
+    "SessionTimeOut": 1000
   }
 }

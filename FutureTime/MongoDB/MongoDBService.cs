@@ -22,7 +22,8 @@ namespace FutureTime.MongoDB
             QuestionModel,
             DailyAuspiciousTimeUpdateModel,
             GuestsModel,
-            CitiesModel
+            CitiesModel,
+            DailyCompatibilityUpdateModel
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)
