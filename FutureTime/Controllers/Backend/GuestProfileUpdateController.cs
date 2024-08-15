@@ -33,7 +33,25 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+        [HttpGet]
+        [Route("loadbasedata")]
+        public IActionResult LoadBaseData()
+        {
+            try
+            {
+                var rashi = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.RASHI).Select(s => s.list).First();
+                response.data.Add("rashi", rashi);
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+
         [HttpPost]
         [Route("UpdateGuestProfile")]
         public async Task<IActionResult> UpdateGuestProfile([FromBody] GuestsProfileDTO data)
@@ -52,7 +70,8 @@ namespace FutureTime.Controllers.Backend
                         basic_description=(data.basic_description ?? "").Trim(),
                         lucky_color=(data.lucky_color??"").Trim(),
                         lucky_gem=(data.lucky_gem ?? "").Trim(),
-                        lucky_number = (data.lucky_number ?? "").Trim()
+                        lucky_number = (data.lucky_number ?? "").Trim(),
+                        rashi_id=data.rashi_id
                     });
 
                 var result = await col.UpdateOneAsync(filter, update);

@@ -330,14 +330,23 @@ namespace FutureTime.Controllers.Backend
 
                 var filter = Builders<GuestsModel>.Filter.Eq("_id", obj_id);
                 var item = await col.Find(filter).FirstOrDefaultAsync();
-
+                var all_rashi = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.RASHI).Select(s => s.list).First();
                 response.data.Add("item", new { 
                     name=item.name,
                     email=item.email,
                     dob=item.dob,
                     tob=item.tob,
                     city_id=item.city_id,
-                    city=""
+                    city="",
+                    guest_profile = item.guest_profile == null ? null 
+                        : new {
+                            basic_description=item.guest_profile.basic_description,
+                            lucky_color=item.guest_profile.lucky_color,
+                            lucky_gem = item.guest_profile.lucky_gem,
+                            lucky_number = item.guest_profile.lucky_number,
+                            rashi_id = item.guest_profile.rashi_id,
+                            rashi_name = all_rashi.Where(w=>w.id == item.guest_profile.rashi_id.ToString()).Select(s=>s.name).FirstOrDefault()
+                        }
                 });
             }
             catch (Exception ex)
@@ -385,6 +394,64 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Profile not found.");
                 }
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+        [GuestAuthFilter]
+        [HttpGet]
+        [Route("GetDashboardData")]
+        public async Task<IActionResult> GetDashboardData(string date)
+        {
+            if (request.guest_id == null)
+            {
+                response = new ApplicationResponse("401");
+
+                return StatusCode(401, response);
+            }
+            try
+            {
+
+                var col = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
+
+                var obj_id = new ObjectId(request.guest_id);
+
+                var filter = Builders<GuestsModel>.Filter.Eq("_id", obj_id);
+                var guest = await col.Find(filter).FirstOrDefaultAsync();
+                if (guest.guest_profile == null)
+                {
+
+                }
+                else
+                {
+                    var rashi_id = guest.guest_profile.rashi_id;
+
+                    var col_aus = MongoDBService.ConnectCollection<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel);
+
+                    var filter_aus = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("transaction_date", date);
+                    var item_aus = await col_aus.Find(filter_aus).FirstOrDefaultAsync();
+
+                    var col_com = MongoDBService.ConnectCollection<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel);
+
+                    var filter_com = Builders<DailyCompatibilityUpdateModel>.Filter.Eq("transaction_date", date);
+                    var item_com = await col_com.Find(filter_com).FirstOrDefaultAsync();
+
+                    var col_kun = MongoDBService.ConnectCollection<DailyKundaliUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyKundaliUpdatesModel);
+
+                    var filter_kun = Builders<DailyKundaliUpdatesModel>.Filter.Eq("transaction_date", date);
+                    var item_kun = await col_kun.Find(filter_kun).FirstOrDefaultAsync();
+
+                    response.data.Add("horoscope", item_kun==null?null:item_kun.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
+                    response.data.Add("compatibility", item_com == null ? null : item_com.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
+                    response.data.Add("auspicious", item_aus == null ? null : item_aus.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
+                }
+
             }
             catch (Exception ex)
             {
