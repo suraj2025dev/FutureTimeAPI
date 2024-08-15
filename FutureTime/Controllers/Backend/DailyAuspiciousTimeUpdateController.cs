@@ -31,7 +31,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpPost]
         [Route("create")]
         public IActionResult Insert([FromBody] DailyAuspiciousTimeUpdateModel data)
@@ -80,7 +80,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("loadbasedata")]
         public IActionResult LoadBaseData()
@@ -99,7 +99,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] DailyAuspiciousTimeUpdateModel data)
@@ -161,7 +161,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList()
@@ -184,7 +184,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)

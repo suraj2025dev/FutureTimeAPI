@@ -17,7 +17,7 @@ using MongoDB.Bson;
 
 namespace FutureTime.Controllers.Backend
 {
-    [Route("[controller]")]
+    [Route("backend/[controller]")]
     public class DailyRashiUpdatesController : ControllerBase
     {
         ApplicationResponse response;

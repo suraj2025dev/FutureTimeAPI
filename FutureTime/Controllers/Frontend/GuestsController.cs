@@ -371,7 +371,7 @@ namespace FutureTime.Controllers.Backend
 
                 var update = Builders<GuestsModel>.Update
                     .Set(u => u.name, data.name)
-                    //.Set(u => u.email, data.email)
+                    .Set(u => u.city_id, data.city_id)
                     .Set(u => u.tob, data.tob)
                     .Set(u => u.dob, data.dob);
 

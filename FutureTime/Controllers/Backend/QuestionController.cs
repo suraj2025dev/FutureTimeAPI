@@ -32,7 +32,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> InsertAsync([FromBody] QuestionModel data)
@@ -83,7 +83,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("loadbasedata")]
         public async Task<IActionResult> LoadBaseDataAsync()
@@ -108,7 +108,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] QuestionModel data)
@@ -184,7 +184,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList()
@@ -207,7 +207,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        [AnonymousAuthorizeFilter]
+        
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)
