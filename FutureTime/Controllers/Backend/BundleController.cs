@@ -17,6 +17,7 @@ using MongoDB.Bson;
 using Microsoft.VisualBasic;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.ObjectModel;
+using SharpCompress.Common;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -258,7 +259,7 @@ namespace FutureTime.Controllers.Backend
             }
             else
             {
-                data.image_blob = data.image_blob.Trim();
+                //data.image_blob = data.image_blob.Trim();
 
                 string[] validImageFormats = {
                     "data:image/jpeg;base64,",
@@ -270,20 +271,18 @@ namespace FutureTime.Controllers.Backend
                     "data:image/x-icon;base64,"
                 };
 
-                bool isValidImage = false;
-
-                foreach (var format in validImageFormats)
+                try
                 {
-                    if (data.image_blob.StartsWith(format))
-                    {
-                        isValidImage = true;
-                        break;
-                    }
+                    // Check if the base64 string has a data URL prefix and remove it
+                    //string base64Data = data.image_blob.Split(',')[1];
+
+                    // Convert the Base64 string to a byte array
+                    byte[] fileBytes = Convert.FromBase64String(data.image_blob);
+
                 }
-
-                if (!isValidImage)
+                catch (Exception ex)
                 {
-                    throw new ErrorException("Please provide a valid image blob");
+                    throw new ErrorException("File invalid.");
                 }
             }
 
