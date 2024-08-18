@@ -12,6 +12,7 @@ namespace FutureTime.MongoDB.Data
         public string lucky_gem { get; set; }
         public string lucky_color { get; set; }
         public int rashi_id { get; set; }
+        public string compatibility_description { get; set; }
     }
 
 }

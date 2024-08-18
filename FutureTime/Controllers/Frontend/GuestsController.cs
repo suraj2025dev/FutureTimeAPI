@@ -345,7 +345,8 @@ namespace FutureTime.Controllers.Backend
                             lucky_gem = item.guest_profile.lucky_gem,
                             lucky_number = item.guest_profile.lucky_number,
                             rashi_id = item.guest_profile.rashi_id,
-                            rashi_name = all_rashi.Where(w=>w.id == item.guest_profile.rashi_id.ToString()).Select(s=>s.name).FirstOrDefault()
+                            rashi_name = all_rashi.Where(w=>w.id == item.guest_profile.rashi_id.ToString()).Select(s=>s.name).FirstOrDefault(),
+                            item.guest_profile.compatibility_description
                         }
                 });
             }
@@ -437,10 +438,10 @@ namespace FutureTime.Controllers.Backend
                     var filter_aus = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("transaction_date", date);
                     var item_aus = await col_aus.Find(filter_aus).FirstOrDefaultAsync();
 
-                    var col_com = MongoDBService.ConnectCollection<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel);
+                    //var col_com = MongoDBService.ConnectCollection<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel);
 
-                    var filter_com = Builders<DailyCompatibilityUpdateModel>.Filter.Eq("transaction_date", date);
-                    var item_com = await col_com.Find(filter_com).FirstOrDefaultAsync();
+                    //var filter_com = Builders<DailyCompatibilityUpdateModel>.Filter.Eq("transaction_date", date);
+                    //var item_com = await col_com.Find(filter_com).FirstOrDefaultAsync();
 
                     var col_kun = MongoDBService.ConnectCollection<DailyHoroscopeUpdatesModel>(MongoDBService.COLLECTION_NAME.DailyHoroscopeUpdatesModel);
 
@@ -448,7 +449,7 @@ namespace FutureTime.Controllers.Backend
                     var item_kun = await col_kun.Find(filter_kun).FirstOrDefaultAsync();
 
                     response.data.Add("horoscope", item_kun==null?null:item_kun.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
-                    response.data.Add("compatibility", item_com == null ? null : item_com.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
+                    response.data.Add("compatibility", guest.guest_profile.compatibility_description);
                     response.data.Add("auspicious", item_aus == null ? null : item_aus.items.Where(w => w.rashi_id == rashi_id).FirstOrDefault());
                 }
 

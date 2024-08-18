@@ -71,7 +71,8 @@ namespace FutureTime.Controllers.Backend
                         lucky_color=(data.lucky_color??"").Trim(),
                         lucky_gem=(data.lucky_gem ?? "").Trim(),
                         lucky_number = (data.lucky_number ?? "").Trim(),
-                        rashi_id=data.rashi_id
+                        rashi_id=data.rashi_id,
+                        compatibility_description = data.compatibility_description
                     });
 
                 var result = await col.UpdateOneAsync(filter, update);
