@@ -123,18 +123,24 @@ namespace FutureTime.Controllers.Backend
                     }
 
                     //data.token = (Guid.NewGuid().ToString() + Guid.NewGuid().ToString() + Guid.NewGuid().ToString()).Replace("-","");
-
-                    col.InsertOne(new GuestsModel
+                    var final_data = new GuestsModel
                     {
-                        active= true,
-                        city_id= data.city_id,
-                        dob= data.dob,
-                        email= data.email,
+                        active = true,
+                        city_id = data.city_id,
+                        dob = data.dob,
+                        email = data.email,
                         name = data.name,
-                        otp=otp,
+                        otp = otp,
                         tob = data.tob,
-                        token=null
-                    });
+                        token = null,
+                        created_date = DateTime.Now,
+                        updated_date = DateTime.Now,
+                        //created_by = request.user_id,
+                        //updated_by = request.user_id,
+                    };
+                    
+                    var result = col.InsertOneAsync(final_data);
+                    _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, final_data._id, request.user_id);
 
                     response.message = "New profile created. OTP is sent to your email.";
                 }
@@ -262,7 +268,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Email / OTP is invalid.");
                 }
 
-                var token = Guid.NewGuid();
+                var token = Guid.NewGuid().ToString();
 
                 var guestDataFilter = Builders<GuestsModel>.Filter.Eq("_id", item._id);
 
@@ -383,7 +389,9 @@ namespace FutureTime.Controllers.Backend
                     .Set(u => u.name, data.name)
                     .Set(u => u.city_id, data.city_id)
                     .Set(u => u.tob, data.tob)
-                    .Set(u => u.dob, data.dob);
+                    .Set(u => u.dob, data.dob)
+                    .Set("updated_date", DateTime.Now)
+                    .Set(u => u.updated_by, null);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -395,6 +403,8 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Profile not found.");
                 }
+
+                _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, request.guest_id, request.guest_id);
             }
             catch (Exception ex)
             {

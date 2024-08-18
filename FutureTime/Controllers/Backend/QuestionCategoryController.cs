@@ -62,8 +62,14 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Undefined category type.");
                 }
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
 
-                col.InsertOne(data);
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel, data._id, request.user_id);
+
                 response.message = "Category created successfully.";
             }
             catch (Exception ex)
@@ -137,7 +143,9 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.category_type_id, data.category_type_id)
                      .Set(u => u.category, data.category)
                      .Set(u => u.active, data.active)
-                     .Set(u => u.order_id, data.order_id);
+                     .Set(u => u.order_id, data.order_id)
+                     .Set(u => u.updated_by, request.user_id)
+                     .Set(u => u.updated_date, DateTime.Now);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -145,6 +153,8 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
+
+                _ = MongoLogRecorder.RecordLogAsync<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel, data._id, request.user_id);
 
 
 

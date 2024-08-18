@@ -71,7 +71,13 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please enter valid price.");
                 }
 
-                col.InsertOne(data);
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
+
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel, data._id, request.user_id);
                 response.message = "Question created successfully.";
             }
             catch (Exception ex)
@@ -161,7 +167,9 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.question_category_id, data.question_category_id)
                      .Set(u => u.active, data.active)
                      .Set(u => u.price, data.price)
-                     .Set(u => u.order_id, data.order_id);
+                     .Set(u => u.order_id, data.order_id)
+                     .Set("updated_date", DateTime.Now)
+                     .Set("updated_by", request.user_id);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -169,7 +177,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-
+                _ = MongoLogRecorder.RecordLogAsync<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel, data._id, request.user_id);
 
 
                 //col.InsertOne(data);

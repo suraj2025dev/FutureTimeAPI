@@ -71,8 +71,13 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide valid user type");
                 }
 
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
 
-                col.InsertOne(data);
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel, data._id, request.user_id);
                 response.message = "User created successfully.";
             }
             catch (Exception ex)
@@ -158,7 +163,9 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.name, data.name)
                      .Set(u => u.email, data.email)
                      .Set(u => u.active, data.active)
-                     .Set(u => u.user_type_id, data.user_type_id);
+                     .Set(u => u.user_type_id, data.user_type_id)
+                     .Set("updated_date", DateTime.Now)
+                     .Set("updated_by", request.user_id);
                 }
                 else
                 {
@@ -167,7 +174,9 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.email, data.email)
                      .Set(u => u.user_type_id, data.user_type_id)
                      .Set(u => u.active, data.active)
-                     .Set(u=>u.password,data.password);
+                     .Set(u=>u.password,data.password)
+                     .Set("updated_date", DateTime.Now)
+                     .Set("updated_by", request.user_id);
                 }
 
                 var result = await col.UpdateOneAsync(filter, update);
@@ -177,7 +186,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
 
-
+                _ = MongoLogRecorder.RecordLogAsync<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel, data._id, request.user_id);
 
                 //col.InsertOne(data);
                 response.message = "User updated successfuly.";

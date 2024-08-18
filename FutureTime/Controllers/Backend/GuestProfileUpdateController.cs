@@ -73,7 +73,9 @@ namespace FutureTime.Controllers.Backend
                         lucky_number = (data.lucky_number ?? "").Trim(),
                         rashi_id=data.rashi_id,
                         compatibility_description = data.compatibility_description
-                    });
+                    })
+                    .Set("updated_date", DateTime.Now)
+                    .Set("updated_by", request.user_id);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -81,6 +83,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
+                _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, data.guest_id, request.user_id);
 
 
 

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace FutureTime.MongoDB.Model
 {
-    public class DailyCompatibilityUpdateModel
+    public class DailyCompatibilityUpdateModel : MasterModel
     {
         //[BsonElement("items")]
         //[JsonPropertyName("items")]

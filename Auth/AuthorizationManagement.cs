@@ -33,7 +33,7 @@ namespace Auth
                 }
             }
 
-            
+
 
 
             //USER BASED AUTH
@@ -59,6 +59,7 @@ namespace Auth
 
 
                 context.HttpContext.Items["user_email"] = active_session.user_email;
+                context.HttpContext.Items["user_id"] = active_session.user_id;
 
 
                 //If user is blocked/locked/inactivate. His session is terminated here.

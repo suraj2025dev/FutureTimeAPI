@@ -68,8 +68,14 @@ namespace FutureTime.Controllers.Backend
 
                     throw new ErrorException("Please provide details of all 12 rashi.");
                 }
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
 
-                col.InsertOne(data);
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel, data._id, request.user_id);
+
                 response.message = "Daily Auspicious Time Updates saved for the day.";
             }
             catch (Exception ex)
@@ -139,9 +145,13 @@ namespace FutureTime.Controllers.Backend
                 var filter = Builders<DailyCompatibilityUpdateModel>.Filter.Eq("_id", id);
                 //var result = await col.UpdateOneAsync(filter,data.ToBsonDocument());
 
-                var update = Builders<DailyCompatibilityUpdateModel>.Update.Set("items", data.items);
+                var update = Builders<DailyCompatibilityUpdateModel>.Update
+                                    .Set("items", data.items)
+                                    .Set("updated_date", DateTime.Now)
+                                    .Set("updated_by", request.user_id);
 
                 var result = await col.UpdateOneAsync(filter, update);
+                _ = MongoLogRecorder.RecordLogAsync<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel, data._id, request.user_id);
 
                 if (result.MatchedCount == 0)
                 {

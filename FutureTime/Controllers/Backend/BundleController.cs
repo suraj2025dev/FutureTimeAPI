@@ -18,6 +18,7 @@ using Microsoft.VisualBasic;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.ObjectModel;
 using SharpCompress.Common;
+using Amazon.Runtime.Internal.Transform;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -48,6 +49,11 @@ namespace FutureTime.Controllers.Backend
 
                 data = await ValidateData(data);
 
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
+
                 //Check if question already exists.
                 var filter = Builders<BundleModel>.Filter.Regex("name", new BsonRegularExpression(data.name.ToLower(), "i"));
                 var exists = col.Find(filter).Any();
@@ -59,7 +65,8 @@ namespace FutureTime.Controllers.Backend
 
                 
 
-                col.InsertOne(data);
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<BundleModel>(MongoDBService.COLLECTION_NAME.BundleModel, data._id, request.user_id);
                 response.message = "Bundle created successfully.";
             }
             catch (Exception ex)
@@ -152,8 +159,10 @@ namespace FutureTime.Controllers.Backend
                     { "price", data.price },
                     { "horoscope_question_count", data.horoscope_question_count },
                     { "compatibility_question_count", data.compatibility_question_count },
-                    { "auspicious_question_id", data.auspicious_question_id }
-                };
+                    { "auspicious_question_id", data.auspicious_question_id },
+                    { "updated_by", request.user_id},
+                    { "updated_date",DateTime.Now}
+            };
 
                 if (data.image_blob != null && data.image_blob!="")
                     updateFields.Add("image_blob", data.image_blob);
@@ -171,7 +180,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Bundle could not be updated.");
                 }
-
+                _ = MongoLogRecorder.RecordLogAsync<BundleModel>(MongoDBService.COLLECTION_NAME.BundleModel, data._id, request.user_id);
 
                 //col.InsertOne(data);
                 response.message = "Bundle updated successfuly.";
@@ -334,6 +343,10 @@ namespace FutureTime.Controllers.Backend
                 var qsn_filter = Builders<QuestionModel>.Filter.Eq("_id", qsn_id);
                 var qsn_item = await qsn_col.Find(qsn_filter).FirstOrDefaultAsync();
                 /////////////
+                if (qsn_item == null)
+                {
+                    throw new ErrorException("Please choose valid auspicious question.");
+                }
                 var qsn_cat_col = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel);
 
                 var qsn_cat_id = new ObjectId(qsn_item.question_category_id);

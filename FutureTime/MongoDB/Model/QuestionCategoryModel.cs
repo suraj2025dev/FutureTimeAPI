@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FutureTime.MongoDB.Model
 {
-    public class QuestionCategoryModel
+    public class QuestionCategoryModel : MasterModel
     {
         //[BsonElement("items")]
         //[JsonPropertyName("items")]

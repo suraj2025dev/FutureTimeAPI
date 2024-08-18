@@ -23,7 +23,8 @@ namespace FutureTime.MongoDB
             GuestsModel,
             CitiesModel,
             DailyCompatibilityUpdateModel,
-            BundleModel
+            BundleModel,
+            DataLogModel
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)

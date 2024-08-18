@@ -68,7 +68,14 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide details of all 12 rashi.");
                 }
 
-                col.InsertOne(data);
+                data.created_by = request.user_id;
+                data.created_date = DateTime.Now;
+                data.updated_by = request.user_id;
+                data.updated_date = DateTime.Now;
+
+                var result = col.InsertOneAsync(data);
+                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, data._id, request.user_id);
+
                 response.message = "Daily Auspicious Time Updates saved for the day.";
             }
             catch (Exception ex)
@@ -138,7 +145,10 @@ namespace FutureTime.Controllers.Backend
                 var filter = Builders<DailyAuspiciousTimeUpdateModel>.Filter.Eq("_id", id);
                 //var result = await col.UpdateOneAsync(filter,data.ToBsonDocument());
 
-                var update = Builders<DailyAuspiciousTimeUpdateModel>.Update.Set("items", data.items);
+                var update = Builders<DailyAuspiciousTimeUpdateModel>.Update
+                                .Set("items", data.items)
+                                .Set("updated_date",DateTime.Now)
+                                .Set("updated_by",request.user_id);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
@@ -146,7 +156,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-
+                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, data._id, request.user_id);
 
 
                 //col.InsertOne(data);

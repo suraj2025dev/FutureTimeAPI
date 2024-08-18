@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace FutureTime.MongoDB.Model
 {
-    public class BundleModel
+    public class BundleModel : MasterModel
     {
         //[BsonElement("items")]
         //[JsonPropertyName("items")]
@@ -22,6 +22,7 @@ namespace FutureTime.MongoDB.Model
         public int horoscope_question_count { get; set; }
         public int compatibility_question_count { get; set; }
         public string auspicious_question_id { get; set; }
+        
     }
 
 }

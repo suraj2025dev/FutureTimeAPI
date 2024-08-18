@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FutureTime.MongoDB.Model
 {
-    public class DailyHoroscopeUpdatesModel
+    public class DailyHoroscopeUpdatesModel : MasterModel
     {
         //[BsonElement("items")]
         //[JsonPropertyName("items")]
