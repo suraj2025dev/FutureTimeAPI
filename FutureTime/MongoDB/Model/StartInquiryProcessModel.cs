@@ -1,0 +1,77 @@
+﻿
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System.Text.Json.Serialization;
+
+namespace FutureTime.MongoDB.Model
+{
+    public enum INQUIRY_TYPE
+    {
+        Regular = 0,
+        Bundle = 1
+    }
+
+    public enum INQUIRY_STATUS
+    {
+        New = 0,
+        InProgress = 1,
+        Completed=2,
+        Cancelled=3
+    }
+
+    public enum INQUIRY_PAYMENT_STATUS
+    {
+        Pending = 0,
+        Paid = 1,
+        Failed = 2
+    }
+    public class StartInquiryProcessModel : MasterModel
+    {
+        //[BsonElement("items")]
+        //[JsonPropertyName("items")]
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? _id { get; set; }
+        public string inquiry_number { get; set; }//auto generated, for tracking
+        public INQUIRY_TYPE inquiry_type { get; set; }
+        public INQUIRY_STATUS inquiry_status { get; set; }
+        public INQUIRY_PAYMENT_STATUS inquiry_payment_status { get; set; }
+        public string? guest_id { get; set; }//Person who paid for the service
+        public string? assignee_id { get; set; }//Id of person who is assigned. Only Assignee person can update description
+
+        public InquiryRegular inquiry_regular { get; set; }
+        public InquiryBundle inquiry_bundle { get; set; }
+    }
+
+    public class InquiryReading
+    {
+        public string assignee_id { get; set; }
+        public string description { get; set; }
+        public DateTime updated_on { get; set; }
+    }
+
+    public class InquiryRegular
+    {
+        public string? question_id { get; set; }//FK
+        public string question { get; set; }//To Be filled from backend
+        public decimal price { get; set; }//To Be filled from backend
+        //Validate Active
+        public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update
+    }
+
+    public class InquiryBundle
+    {
+        public string? bundle_id { get; set; }
+        public string bundle_name { get; set; }//To Be Filled From Backend
+        public string description { get; set; }//To Be Filled From Backend
+        //Validate Effective From & To, Active
+        public decimal price { get; set; }
+        //Validate Count
+        public List<InquiryRegular> horoscope_question { get; set; }
+        //Validate Count
+        public List<InquiryRegular> compatibility_question { get; set; }
+        //Validate Count
+        public List<InquiryRegular> auspicious_question { get; set; }
+    }
+
+}

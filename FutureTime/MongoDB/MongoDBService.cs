@@ -24,7 +24,8 @@ namespace FutureTime.MongoDB
             CitiesModel,
             DailyCompatibilityUpdateModel,
             BundleModel,
-            DataLogModel
+            DataLogModel,
+            StartInquiryProcessModel
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)
