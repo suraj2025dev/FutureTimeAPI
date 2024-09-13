@@ -20,6 +20,8 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
 using System.Globalization;
 using FutureTime.MongoDB.Data;
+using DbUp;
+using System.Xml.Linq;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -107,6 +109,9 @@ namespace FutureTime.Controllers.Backend
                     inquiry_bundle = null,
                     inquiry_regular = null,
                     inquiry_number =  Guid.NewGuid().ToString().Replace("-",""),
+                    is_read = false,
+                    profile1=dto.profile1,
+                    profile2=dto.profile2
                 };
 
                 if(new_inquiry.inquiry_type == INQUIRY_TYPE.Regular)
@@ -177,14 +182,16 @@ namespace FutureTime.Controllers.Backend
 
                     }
 
+                    //Aus Time
+                    DateTime auspicious_from_date1 = DateTime.MinValue;
                     if (qsn_cat_detail.category_type_id == 3)
                     {
                         if(dto.auspicious_from_date == "" || dto.auspicious_from_date == null)
                         {
                             throw new ErrorException("Please provide auspicious time prediction start date (auspicious_from_date).");
                         }
-                        //Aus Time
-                        if (!DateTime.TryParse(dto.auspicious_from_date, out DateTime auspicious_from_date1))
+                        
+                        if (!DateTime.TryParse(dto.auspicious_from_date, out auspicious_from_date1))
                         {
                             throw new ErrorException("Please provide valid auspicious_from_date in format like 2024-01-01");
                         }
@@ -195,7 +202,9 @@ namespace FutureTime.Controllers.Backend
                         question_id = dto.inquiry_regular.question_id,
                         price=qsn_detail.price,
                         question=qsn_detail.question,
-                        reading_activity = null
+                        reading_activity = null,
+                        auspicious_from_date = qsn_cat_detail.category_type_id == 3 ? auspicious_from_date1 : null,
+                        category_type_id=qsn_cat_detail.category_type_id
                     };
                 }
                 else
@@ -324,6 +333,103 @@ namespace FutureTime.Controllers.Backend
                 response.message = "Purchase successfull.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
 
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+
+        }
+
+        [GuestAuthFilter]
+        [HttpGet]
+        [Route("MyInquiries")]
+        public async Task<IActionResult> MyInquiries(string subsribed_on_from=null, 
+                                                        string subsribed_on_to=null, 
+                                                        string inquiry_number = null, 
+                                                        decimal? price_from = null,
+                                                        decimal? price_to = null
+                                                    )
+        {
+            if (request.guest_id == null)
+            {
+                response = new ApplicationResponse("401");
+
+                return StatusCode(401, response);
+            }
+            try
+            {
+                if (subsribed_on_from!=null && !DateTime.TryParse(subsribed_on_from, out DateTime _subsribed_on_from))
+                {
+                    throw new ErrorException("Please provide valid subsribed_on_from in format like 2024-01-01");
+                }
+                else
+                {
+                    _subsribed_on_from = DateTime.Now;
+
+                }
+
+                if (subsribed_on_to != null && !DateTime.TryParse(subsribed_on_to, out DateTime _subsribed_on_to))
+                {
+                    throw new ErrorException("Please provide valid subsribed_on_to in format like 2024-01-01");
+                }
+                else
+                {
+                    _subsribed_on_to = DateTime.Now;
+
+                }
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("guest_id", request.guest_id),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true)
+                                );
+
+                if (_subsribed_on_from != null && subsribed_on_to != null)
+                {
+                    // Add date filter if both dates are provided
+                    var dateFilter = Builders<StartInquiryProcessModel>.Filter.And(
+                        Builders<StartInquiryProcessModel>.Filter.Gte(x => x.created_date.Date, _subsribed_on_from),
+                        Builders<StartInquiryProcessModel>.Filter.Lt(x => x.created_date.Date, _subsribed_on_to)
+                    );
+                    filters = Builders<StartInquiryProcessModel>.Filter.And(filters, dateFilter);
+                }
+
+                if (inquiry_number != null)
+                {
+                    filters = Builders<StartInquiryProcessModel>.Filter.And(filters,
+                                Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Regex("inquiry_number", new BsonRegularExpression($"^{inquiry_number}$", "i"))
+                                )
+                        );
+                }
+
+                if (price_from != null && price_to != null)
+                {
+                    // Add date filter if both dates are provided
+                    var pricefilter = Builders<StartInquiryProcessModel>.Filter.And(
+                        Builders<StartInquiryProcessModel>.Filter.Gte(x => x.inquiry_regular.price, price_from),
+                        Builders<StartInquiryProcessModel>.Filter.Lt(x => x.inquiry_regular.price, price_to)
+                    );
+                    filters = Builders<StartInquiryProcessModel>.Filter.And(filters, pricefilter);
+                }
+
+                var qsn_detail = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
+                                    .Find(filters).ToList()
+                                    .Select(s=>new 
+                                    {
+                                        s.inquiry_regular.question,
+                                        s.inquiry_regular.price,
+                                        s.inquiry_number,
+                                        payment_successfull = s.inquiry_payment_status==INQUIRY_PAYMENT_STATUS.Paid?true:false,
+                                        purchased_on = s.created_date,
+                                        s.profile1,
+                                        s.profile2,
+                                        s.inquiry_regular.auspicious_from_date,
+                                        s.inquiry_regular.category_type_id,
+                                        is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
+                                        s.is_read
+                                    }).ToList();
             }
             catch (Exception ex)
             {

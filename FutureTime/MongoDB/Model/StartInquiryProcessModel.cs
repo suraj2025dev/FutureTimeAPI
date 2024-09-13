@@ -50,8 +50,9 @@ namespace FutureTime.MongoDB.Model
         public string? assignee_id { get; set; }//Id of person who is assigned. Only Assignee person can update description
         public InquiryRegular inquiry_regular { get; set; }
         public InquiryBundle inquiry_bundle { get; set; }
-        public InqurityGuestProfile Profile1 { get; set; }
-        public InqurityGuestProfile Profile2 { get; set; }
+        public InqurityGuestProfile profile1 { get; set; }
+        public InqurityGuestProfile profile2 { get; set; }
+        public bool is_read { get; set; }
     }
 
     public class InquiryReading
@@ -63,9 +64,11 @@ namespace FutureTime.MongoDB.Model
 
     public class InquiryRegular
     {
+        public int category_type_id { get; set; }
         public string? question_id { get; set; }//FK
         public string question { get; set; }//To Be filled from backend
         public decimal price { get; set; }//To Be filled from backend
+        public DateTime? auspicious_from_date { get; set; }
         //Validate Active
         public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update
     }
