@@ -429,7 +429,7 @@ namespace FutureTime.Controllers.Backend
                                         s.inquiry_regular.category_type_id,
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read
-                                    }).ToList();
+                                    }).OrderByDescending(o=>o.purchased_on).ToList();
             }
             catch (Exception ex)
             {
