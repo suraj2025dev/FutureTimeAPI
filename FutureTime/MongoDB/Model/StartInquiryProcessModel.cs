@@ -13,8 +13,7 @@ namespace FutureTime.MongoDB.Model
 
     public enum INQUIRY_STATUS
     {
-        New = 0,
-        InProgress = 1,
+        Pending = 1,
         Completed=2,
         Cancelled=3
     }
@@ -25,6 +24,16 @@ namespace FutureTime.MongoDB.Model
         Paid = 1,
         Failed = 2
     }
+
+    public enum INQUIRY_STATE
+    {
+        New = 0,
+        Expert = 1,
+        Translator = 2,
+        Reviewer = 3,
+        Published = 4
+    }
+
     public class StartInquiryProcessModel : MasterModel
     {
         //[BsonElement("items")]
@@ -36,11 +45,13 @@ namespace FutureTime.MongoDB.Model
         public INQUIRY_TYPE inquiry_type { get; set; }
         public INQUIRY_STATUS inquiry_status { get; set; }
         public INQUIRY_PAYMENT_STATUS inquiry_payment_status { get; set; }
+        public INQUIRY_STATE inquiry_state { get; set; }
         public string? guest_id { get; set; }//Person who paid for the service
         public string? assignee_id { get; set; }//Id of person who is assigned. Only Assignee person can update description
-
         public InquiryRegular inquiry_regular { get; set; }
         public InquiryBundle inquiry_bundle { get; set; }
+        public InqurityGuestProfile Profile1 { get; set; }
+        public InqurityGuestProfile Profile2 { get; set; }
     }
 
     public class InquiryReading
@@ -72,6 +83,14 @@ namespace FutureTime.MongoDB.Model
         public List<InquiryRegular> compatibility_question { get; set; }
         //Validate Count
         public List<InquiryRegular> auspicious_question { get; set; }
+    }
+
+    public class InqurityGuestProfile
+    {
+        public string name { get; set; }
+        public string city_id { get; set; }
+        public string dob { get; set; }
+        public string tob { get; set; }
     }
 
 }

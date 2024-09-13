@@ -53,6 +53,46 @@ namespace FutureTime.Controllers.Backend
             }
             try
             {
+
+                # region Validate Profile1
+                if(dto.profile1 == null)
+                {
+                    throw new ErrorException("Profile 1 data is required.");
+                }
+                if (dto.profile1.name == "" || dto.profile1.name == null)
+                {
+                    throw new ErrorException("Profile 1 name is required.");
+                }
+
+                if (dto.profile1.dob == "" || dto.profile1.dob == null)
+                {
+                    throw new ErrorException("Profile 1 dob is required.");
+                }
+
+                if (!DateTime.TryParse(dto.profile1.dob, out DateTime _dob))
+                {
+                    throw new ErrorException("Please provide valid dob in format like 2024-01-01");
+                }
+
+                if (dto.profile1.tob == "" || dto.profile1.tob == null)
+                {
+                    throw new ErrorException("Profile 1 tob is required.");
+                }
+
+                string time_pattern = @"^([01]\d|2[0-3]):([0-5]\d)$";
+                Regex regex = new Regex(time_pattern);
+                if (!regex.IsMatch(dto.profile1.tob))
+                {
+                    throw new ErrorException("Please provide valid tob in HH:MM format from 00:00 to 23:59");
+                }
+
+                if (dto.profile1.city_id == "" || dto.profile1.city_id == null)
+                {
+                    throw new ErrorException("Profile 1 city is required.");
+                }
+
+                #endregion
+
                 var current_date = DateTime.Now;
                 //Validation & Data Filling
                 var new_inquiry = new StartInquiryProcessModel { 
@@ -60,8 +100,9 @@ namespace FutureTime.Controllers.Backend
                     created_by=request.guest_id,
                     created_date= current_date,
                     guest_id=request.guest_id,
-                    inquiry_payment_status = INQUIRY_PAYMENT_STATUS.Pending,
-                    inquiry_status = INQUIRY_STATUS.New,
+                    inquiry_payment_status = INQUIRY_PAYMENT_STATUS.Paid,
+                    inquiry_status = INQUIRY_STATUS.Pending,
+                    inquiry_state = INQUIRY_STATE.New,
                     inquiry_type = dto.inquiry_type,
                     inquiry_bundle = null,
                     inquiry_regular = null,
@@ -75,28 +116,85 @@ namespace FutureTime.Controllers.Backend
                                                 Builders<QuestionModel>.Filter.Eq("_id", dto.inquiry_regular.question_id),
                                                 Builders<QuestionModel>.Filter.Eq("active", true)
                                             )).FirstOrDefault();
-                    //var qsn_category_detail = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel)
-                    //                            .Find(Builders<QuestionCategoryModel>.Filter.And(
-                    //                                Builders<QuestionCategoryModel>.Filter.Eq("_id", qsn_detail.question_category_id),
-                    //                                Builders<QuestionCategoryModel>.Filter.Eq("active", true)
-                    //                            )).FirstOrDefault();
-
+                    
                     if (qsn_detail == null)
                     {
                         throw new ErrorException("Question choosen in invalid");
                     }
 
-                    //if (qsn_category_detail == null)
-                    //{
-                    //    throw new ErrorException("Question Category is not valid.");
-                    //}
+                    var qsn_cat_detail = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel)
+                                    .Find(Builders<QuestionCategoryModel>.Filter.And(
+                                                Builders<QuestionCategoryModel>.Filter.Eq("_id", qsn_detail.question_category_id)
+                                                //Builders<QuestionCategoryModel>.Filter.Eq("active", true)
+                                            )).FirstOrDefault();
+
+                    if(qsn_cat_detail == null)
+                    {
+                        throw new ErrorException("Question Category in invalid");
+                    }
+
+                    if(qsn_cat_detail.category_type_id == 2)
+                    {
+                        //Compatibility Verification
+                        #region Validate Profile2
+                        if (dto.profile2 == null)
+                        {
+                            throw new ErrorException("Profile 2 data is required.");
+                        }
+                        if (dto.profile2.name == "" || dto.profile2.name == null)
+                        {
+                            throw new ErrorException("Profile 2 name is required.");
+                        }
+
+                        if (dto.profile2.dob == "" || dto.profile2.dob == null)
+                        {
+                            throw new ErrorException("Profile 2 dob is required.");
+                        }
+
+                        if (!DateTime.TryParse(dto.profile2.dob, out DateTime _dob2))
+                        {
+                            throw new ErrorException("Please provide valid dob in format like 2024-01-01");
+                        }
+
+                        if (dto.profile2.tob == "" || dto.profile2.tob == null)
+                        {
+                            throw new ErrorException("Profile 2 tob is required.");
+                        }
+
+                        string time_pattern2 = @"^([01]\d|2[0-3]):([0-5]\d)$";
+                        Regex regex2 = new Regex(time_pattern2);
+                        if (!regex2.IsMatch(dto.profile2.tob))
+                        {
+                            throw new ErrorException("Please provide valid tob in HH:MM format from 00:00 to 23:59");
+                        }
+
+                        if (dto.profile2.city_id == "" || dto.profile2.city_id == null)
+                        {
+                            throw new ErrorException("Profile 2 city is required.");
+                        }
+
+                        #endregion
+
+                    }
+
+                    if (qsn_cat_detail.category_type_id == 3)
+                    {
+                        if(dto.auspicious_from_date == "" || dto.auspicious_from_date == null)
+                        {
+                            throw new ErrorException("Please provide auspicious time prediction start date (auspicious_from_date).");
+                        }
+                        //Aus Time
+                        if (!DateTime.TryParse(dto.auspicious_from_date, out DateTime auspicious_from_date1))
+                        {
+                            throw new ErrorException("Please provide valid auspicious_from_date in format like 2024-01-01");
+                        }
+                    }
+
 
                     new_inquiry.inquiry_regular = new InquiryRegular { 
                         question_id = dto.inquiry_regular.question_id,
                         price=qsn_detail.price,
                         question=qsn_detail.question,
-                        //question_category=qsn_category_detail.category,
-                        //question_category_id=qsn_category_detail._id,
                         reading_activity = null
                     };
                 }
@@ -220,9 +318,10 @@ namespace FutureTime.Controllers.Backend
                 var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
                 await col.InsertOneAsync(new_inquiry);
 
-                _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, new_inquiry._id, request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, new_inquiry._id, request.user_id);
 
-                response.message = "Please complete the payment process.";
+                //response.message = "Please complete the payment process.";
+                response.message = "Purchase successfull.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
 
             }

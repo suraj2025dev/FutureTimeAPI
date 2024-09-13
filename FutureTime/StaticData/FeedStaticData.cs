@@ -93,12 +93,12 @@
                 new StaticDataList
                 {
                     id = "3",
-                    name = "Translator"
+                    name = "Expert"
                 },
                 new StaticDataList
                 {
                     id = "4",
-                    name = "Guru"
+                    name = "Translator"
                 }
                 }
             });

@@ -10,11 +10,14 @@ namespace FutureTime.MongoDB.Data
     public class StartInquiryProcessDTO 
     {
         public INQUIRY_TYPE inquiry_type { get; set; }
-        public INQUIRY_STATUS InquiryStatus { get; set; }
-        public INQUIRY_PAYMENT_STATUS InquiryPaymentStatus { get; set; }
-        public string? guest_id { get; set; }//Person who paid for the service
+        //public INQUIRY_STATUS InquiryStatus { get; set; }
+        //public INQUIRY_PAYMENT_STATUS InquiryPaymentStatus { get; set; }
+        //public string? guest_id { get; set; }//Person who paid for the service
         public InquiryRegularDTO inquiry_regular { get; set; }
         public InquiryBundleDTO inquiry_bundle { get; set; }
+        public InqurityGuestProfile profile1 { get; set; }
+        public InqurityGuestProfile profile2 { get; set; }
+        public string auspicious_from_date { get; set; }
 
     }
 
