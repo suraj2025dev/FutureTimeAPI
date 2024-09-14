@@ -205,7 +205,7 @@ namespace FutureTime.Controllers.Backend
                         question_id = dto.inquiry_regular.question_id,
                         price=qsn_detail.price,
                         question=qsn_detail.question,
-                        reading_activity = null,
+                        reading_activity = new List<InquiryReading> { },
                         auspicious_from_date = qsn_cat_detail.category_type_id == 3 ? auspicious_from_date1 : null,
                         category_type_id=qsn_cat_detail.category_type_id
                     };
@@ -431,7 +431,8 @@ namespace FutureTime.Controllers.Backend
                                         s.inquiry_regular.auspicious_from_date,
                                         s.inquiry_regular.category_type_id,
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
-                                        s.is_read
+                                        s.is_read,
+                                        s.final_reading
                                     }).OrderByDescending(o=>o.purchased_on).ToList();
 
                 response.data.Add("inquiries", inquiries);
@@ -444,6 +445,49 @@ namespace FutureTime.Controllers.Backend
 
         }
 
+        [GuestAuthFilter]
+        [HttpGet]
+        [Route("MarkAsRead")]
+        public async Task<IActionResult> MarkAsRead(string inquiry_id)
+        {
+            if (request.guest_id == null)
+            {
+                response = new ApplicationResponse("401");
+
+                return StatusCode(401, response);
+            }
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", inquiry_id)
+                                );
+
+                var update = Builders<StartInquiryProcessModel>.Update
+                    .Set(i => i.is_read, true)
+                    .Set(i => i.updated_by, request.guest_id)
+                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
+
+                var result = await col.UpdateOneAsync(filters, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, inquiry_id, request.user_id);
+
+                response.message = "Marked as read.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+
+        }
 
     }
 }

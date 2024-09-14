@@ -30,15 +30,16 @@ namespace FutureTime.Controllers.Backend
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
-
+            request.user_id = "123";
         }
 
         [HttpGet]
         [Route("GetInquiries")]
+        [AnonymousAuthorizeFilter]
         public async Task<IActionResult> GetInquiries(string inquiry_state, string inquiry_status)
         {
             var _inquiry_status = inquiry_status == "pending" ? INQUIRY_STATUS.Pending : INQUIRY_STATUS.Completed;
-            var _inquiry_state = GetEnumFromStatus(inquiry_status);
+            var _inquiry_state = GetEnumFromStatus(inquiry_state);
             try
             {
                 //var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
@@ -54,6 +55,7 @@ namespace FutureTime.Controllers.Backend
                                     .Find(filters).ToList()
                                     .Select(s => new
                                     {
+                                        inquiry_id = s._id,
                                         s.inquiry_regular.question,
                                         s.inquiry_regular.price,
                                         s.inquiry_number,
@@ -63,9 +65,12 @@ namespace FutureTime.Controllers.Backend
                                         s.profile2,
                                         s.inquiry_regular.auspicious_from_date,
                                         s.inquiry_regular.category_type_id,
-                                        is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
-                                        s.is_read,
-                                        assignee = s.assignee_id,//TODO
+                                        //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
+                                        //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
+                                        //s.is_read,
+                                        assignee = GetUsers(s.assignee_id)==null?"":GetUsers(s.assignee_id).name,//TODO
+                                        s.comment_for_assignee,
+                                        s.final_reading
                                     }).OrderByDescending(o => o.purchased_on).ToList();
 
                 response.data.Add("list", items);
@@ -81,6 +86,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("ChangeAssignee")]
+        [AnonymousAuthorizeFilter]
         public async Task<IActionResult> ChangeAssignee([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -92,12 +98,7 @@ namespace FutureTime.Controllers.Backend
                                     Builders<StartInquiryProcessModel>.Filter.Eq("_id", dto.inquiry_id)
                                 );
 
-                //var reading_activity = new InquiryReading
-                //{
-                //    assignee_id = dto.assignee_id,
-                //    description = dto.comment,
-                //    updated_on = DateTime.Now
-                //};
+                //var assigned_person = col.Find(filters).FirstOrDefault().ass;
 
                 var assignee = GetUsers(dto.assignee_id);
                 var new_state = INQUIRY_STATE.New;
@@ -147,6 +148,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("PushComment")]
+        [AnonymousAuthorizeFilter]
         public async Task<IActionResult> PushComment([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -157,56 +159,16 @@ namespace FutureTime.Controllers.Backend
                                     Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
                                     Builders<StartInquiryProcessModel>.Filter.Eq("_id", dto.inquiry_id)
                                 );
+                var item = col.Find(filters).FirstOrDefault();
 
-                var reading_activity = new InquiryReading
+                if(item.inquiry_status == INQUIRY_STATUS.Completed)
                 {
-                    assignee_id = dto.assignee_id,
-                    description = dto.comment,
-                    updated_on = DateTime.Now
-                };
-
-                var update = Builders<StartInquiryProcessModel>.Update
-                    .Push(i => i.inquiry_regular.reading_activity, reading_activity)  // Push to reading_activity array
-                    .Set(i => i.inquiry_status, INQUIRY_STATUS.Completed)
-                    .Set(i => i.updated_by, request.user_id)
-                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
-
-                var result = await col.UpdateOneAsync(filters, update);
-
-                if (result.MatchedCount == 0)
-                {
-                    throw new ErrorException("Please provide valid id for update operation.");
+                    throw new ErrorException("Can not post comment in completed inquiry");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, dto.inquiry_id, request.user_id);
-
-                response.message = "Comment Pushed.";
-
-            }
-            catch (Exception ex)
-            {
-                response = ex.GenerateResponse();
-            }
-            //response.message = "Daily Rashi Updates saved for the day.";
-            return Ok(response);
-
-        }
-
-        [HttpPost]
-        [Route("PublishInquiry")]
-        public async Task<IActionResult> PublishInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
-        {
-            try
-            {
-                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
-
-                var filters = Builders<StartInquiryProcessModel>.Filter.And(
-                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
-                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", dto.inquiry_id)
-                                );
 
                 var reading_activity = new InquiryReading
                 {
-                    assignee_id = dto.assignee_id,
+                    assignee_id = col.Find(filters).FirstOrDefault().assignee_id,
                     description = dto.comment,
                     updated_on = DateTime.Now
                 };
@@ -238,12 +200,97 @@ namespace FutureTime.Controllers.Backend
         }
 
         [HttpGet]
+        [Route("GetCommentHistory")]
+        [AnonymousAuthorizeFilter]
+        public async Task<IActionResult> GetCommentHistory(string inquiry_id)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", inquiry_id)
+                                );
+
+                var item = col.Find(filters).FirstOrDefault();
+
+                var comment = item.inquiry_regular.reading_activity.Select(s => new { 
+                    assignee = GetUsers(s.assignee_id).name,
+                    s.description,
+                    s.updated_on
+                }).OrderByDescending(o=>o.updated_on).ToList();
+
+                response.data.Add("comment", comment);
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+
+        [HttpPost]
+        [Route("PublishInquiry")]
+        [AnonymousAuthorizeFilter]
+        public async Task<IActionResult> PublishInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", dto.inquiry_id)
+                                );
+
+                //var reading_activity = new InquiryReading
+                //{
+                //    assignee_id = dto.assignee_id,
+                //    description = dto.comment,
+                //    updated_on = DateTime.Now
+                //};
+
+                var update = Builders<StartInquiryProcessModel>.Update
+                    //.Push(i => i.inquiry_regular.reading_activity, reading_activity)  // Push to reading_activity array
+                    .Set(i => i.final_reading, dto.comment)
+                    .Set(i => i.inquiry_status, INQUIRY_STATUS.Completed)
+                    .Set(i => i.inquiry_state, INQUIRY_STATE.Published)
+                    .Set(i => i.updated_by, request.user_id)
+                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
+
+                var result = await col.UpdateOneAsync(filters, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, dto.inquiry_id, request.user_id);
+
+                response.message = "Published to the user.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+        [HttpGet]
         [Route("GetAssigneeList")]
+        [AnonymousAuthorizeFilter]
         public async Task<IActionResult> GetAssigneeList()
         {
             try
             {
-                var user_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.USER_TYPE).Select(s => s.list).First();
+                var user_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.USER_TYPE).Select(s => s.list).First().Where(w=>int.Parse(w.id) >=3).ToList();
 
                 response.data.Add("user_type", user_type);
 
@@ -251,7 +298,7 @@ namespace FutureTime.Controllers.Backend
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
 
-                response.data.Add("user", items);
+                response.data.Add("user", items.Where(w=>w.user_type_id>=3).ToList());
             }
             catch (Exception ex)
             {
@@ -276,6 +323,7 @@ namespace FutureTime.Controllers.Backend
 
         private UsersModel GetUsers(string user_id)
         {
+            if (user_id == null) return null;
             var col = MongoDBService.ConnectCollection<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel);
 
             var obj_id = new ObjectId(user_id);

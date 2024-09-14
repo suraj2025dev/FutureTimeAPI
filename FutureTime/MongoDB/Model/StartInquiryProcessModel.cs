@@ -55,6 +55,7 @@ namespace FutureTime.MongoDB.Model
         public InqurityGuestProfile profile1 { get; set; }
         public InqurityGuestProfile profile2 { get; set; }
         public bool is_read { get; set; }
+        public string final_reading { get; set; }
         public bool active { get; set; }
     }
 
