@@ -99,6 +99,11 @@
                 {
                     id = "4",
                     name = "Translator"
+                },
+                new StaticDataList
+                {
+                    id = "5",
+                    name = "Reviewer"
                 }
                 }
             });

@@ -14,8 +14,8 @@ namespace FutureTime.MongoDB.Model
     public enum INQUIRY_STATUS
     {
         Pending = 1,
-        Completed=2,
-        Cancelled=3
+        Completed=2
+        //Cancelled=3
     }
 
     public enum INQUIRY_PAYMENT_STATUS
@@ -31,7 +31,8 @@ namespace FutureTime.MongoDB.Model
         Expert = 1,
         Translator = 2,
         Reviewer = 3,
-        Published = 4
+        Published = 4,
+        Cancelled = 5
     }
 
     public class StartInquiryProcessModel : MasterModel
@@ -48,6 +49,7 @@ namespace FutureTime.MongoDB.Model
         public INQUIRY_STATE inquiry_state { get; set; }
         public string? guest_id { get; set; }//Person who paid for the service
         public string? assignee_id { get; set; }//Id of person who is assigned. Only Assignee person can update description
+        public string? comment_for_assignee { get; set; }//Id of person who is assigned. Only Assignee person can update description
         public InquiryRegular inquiry_regular { get; set; }
         public InquiryBundle inquiry_bundle { get; set; }
         public InqurityGuestProfile profile1 { get; set; }
@@ -69,6 +71,7 @@ namespace FutureTime.MongoDB.Model
         public string question { get; set; }//To Be filled from backend
         public decimal price { get; set; }//To Be filled from backend
         public DateTime? auspicious_from_date { get; set; }
+        public string publish_content { get; set; }
         //Validate Active
         public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update
     }
