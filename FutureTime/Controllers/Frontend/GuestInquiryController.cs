@@ -432,7 +432,8 @@ namespace FutureTime.Controllers.Backend
                                         s.inquiry_regular.category_type_id,
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read,
-                                        s.final_reading
+                                        s.final_reading,
+                                        final_reading_on = (DateTime?)(s.is_read ? s.updated_date : null)
                                     }).OrderByDescending(o=>o.purchased_on).ToList();
 
                 response.data.Add("inquiries", inquiries);
