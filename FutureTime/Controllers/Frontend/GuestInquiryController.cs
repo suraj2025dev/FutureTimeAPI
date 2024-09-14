@@ -111,7 +111,10 @@ namespace FutureTime.Controllers.Backend
                     inquiry_number =  Guid.NewGuid().ToString().Replace("-",""),
                     is_read = false,
                     profile1=dto.profile1,
-                    profile2=dto.profile2
+                    profile2=dto.profile2,
+                    active=true,
+                    updated_by=request.guest_id,
+                    updated_date= current_date
                 };
 
                 if(new_inquiry.inquiry_type == INQUIRY_TYPE.Regular)
@@ -414,7 +417,7 @@ namespace FutureTime.Controllers.Backend
                     filters = Builders<StartInquiryProcessModel>.Filter.And(filters, pricefilter);
                 }
 
-                var qsn_detail = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
+                var inquiries = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
                                     .Find(filters).ToList()
                                     .Select(s=>new 
                                     {
@@ -430,6 +433,8 @@ namespace FutureTime.Controllers.Backend
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read
                                     }).OrderByDescending(o=>o.purchased_on).ToList();
+
+                response.data.Add("inquiries", inquiries);
             }
             catch (Exception ex)
             {
