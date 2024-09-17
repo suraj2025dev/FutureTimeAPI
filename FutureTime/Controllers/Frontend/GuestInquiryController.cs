@@ -421,6 +421,7 @@ namespace FutureTime.Controllers.Backend
                                     .Find(filters).ToList()
                                     .Select(s=>new 
                                     {
+                                        inquiry_id = s._id,
                                         s.inquiry_regular.question,
                                         s.inquiry_regular.price,
                                         s.inquiry_number,
