@@ -18,6 +18,7 @@ namespace FutureTime.MongoDB.Data
         public InqurityGuestProfile profile1 { get; set; }
         public InqurityGuestProfile profile2 { get; set; }
         public string auspicious_from_date { get; set; }
+        public string horoscope_from_date { get; set; }
 
     }
 

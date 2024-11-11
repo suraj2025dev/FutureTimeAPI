@@ -44,15 +44,19 @@ namespace FutureTime.Controllers.Backend
                 data._id = null;
 
                 //Check if category already exists.
-                var filter = Builders<QuestionCategoryModel>.Filter.Regex("category", new BsonRegularExpression(data.category.ToLower(), "i"));
-                var exists = col.Find(filter).Any();
+                #region Check Category Name Exists in other id
+                var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", new BsonRegularExpression(data.category.ToLower(), "i"));
+                var ctFilter = Builders<QuestionCategoryModel>.Filter.Eq("category_type_id", data.category_type_id);
+                var combinedFilter = Builders<QuestionCategoryModel>.Filter.And(c_filter, ctFilter);
+                var exists = col.Find(combinedFilter).Any();
 
                 if (exists)
                 {
-                    throw new ErrorException("Category with same description already exists.");
+                    throw new ErrorException("This category description is already in use.");
                 }
+                #endregion
 
-                if(data.category==null || data.category == "")
+                if (data.category==null || data.category == "")
                 {
                     throw new ErrorException("Please provide category.");
                 }
@@ -113,7 +117,8 @@ namespace FutureTime.Controllers.Backend
                 #region Check Category Name Exists in other id
                 var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", new BsonRegularExpression(data.category.ToLower(), "i"));
                 var idFilter = Builders<QuestionCategoryModel>.Filter.Ne("_id", data._id);
-                var combinedFilter = Builders<QuestionCategoryModel>.Filter.And(c_filter, idFilter);
+                var ctFilter = Builders<QuestionCategoryModel>.Filter.Ne("category_type_id", data.category_type_id);
+                var combinedFilter = Builders<QuestionCategoryModel>.Filter.And(c_filter, idFilter, ctFilter);
                 var exists = col.Find(combinedFilter).Any();
 
                 if (exists)

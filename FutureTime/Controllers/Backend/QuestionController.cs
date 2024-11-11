@@ -44,7 +44,13 @@ namespace FutureTime.Controllers.Backend
                 data._id = null;
 
                 //Check if question already exists.
-                var filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
+                //var filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
+
+                var filter = Builders<QuestionModel>.Filter.And(
+                                Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i")),
+                                Builders<QuestionModel>.Filter.Regex("question_category_id", new BsonRegularExpression($"^{data.question_category_id}$", "i"))
+                            );
+
                 var exists = col.Find(filter).Any();
 
                 if (exists)
@@ -127,7 +133,8 @@ namespace FutureTime.Controllers.Backend
                 #region Check question Name Exists in other id
                 var c_filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
                 var idFilter = Builders<QuestionModel>.Filter.Ne("_id", data._id);
-                var combinedFilter = Builders<QuestionModel>.Filter.And(c_filter, idFilter);
+                var qcFilter = Builders<QuestionModel>.Filter.Eq("question_category_id", data.question_category_id);
+                var combinedFilter = Builders<QuestionModel>.Filter.And(c_filter, idFilter, qcFilter);
                 var exists = col.Find(combinedFilter).Any();
 
                 if (exists)

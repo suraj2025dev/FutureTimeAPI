@@ -64,6 +64,7 @@ namespace FutureTime.Controllers.Backend
                                         s.profile1,
                                         s.profile2,
                                         s.inquiry_regular.auspicious_from_date,
+                                        s.inquiry_regular.horoscope_from_date,
                                         s.inquiry_regular.category_type_id,
                                         //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
                                         //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,

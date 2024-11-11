@@ -11,8 +11,6 @@
     <None Remove="Migration\1\000000000_uuid_extension.sql" />
     <None Remove="Migration\1\000000001_pms_schema.sql" />
     <None Remove="Migration\1\000000001_public.fn_new_uuid.sql" />
-    <None Remove="Migration\1\000000002_pms.tbl_property.sql" />
-    <None Remove="Migration\1\000000003_pms.tbl_property.sql" />
     <None Remove="Migration\1\000000005_pms.tbl_user.sql" />
     <None Remove="Migration\1\000000006_public.tbl_error_log.sql" />
     <None Remove="Migration\1\000000007_public.tbl_activity_log.sql" />

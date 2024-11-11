@@ -66,7 +66,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide password");
                 }
 
-                if (!(new List<int> { 1,2,3,4}).Contains(data.user_type_id))
+                if (!(new List<int> { 1,2,3,4,5 }).Contains(data.user_type_id))
                 {
                     throw new ErrorException("Please provide valid user type");
                 }
@@ -127,7 +127,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide email");
                 }
 
-                if (!(new List<int> { 1, 2, 3, 4 }).Contains(data.user_type_id))
+                if (!(new List<int> { 1, 2, 3, 4, 5 }).Contains(data.user_type_id))
                 {
                     throw new ErrorException("Please provide valid user type");
                 }

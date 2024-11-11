@@ -73,6 +73,7 @@ namespace FutureTime.MongoDB.Model
         public string question { get; set; }//To Be filled from backend
         public decimal price { get; set; }//To Be filled from backend
         public DateTime? auspicious_from_date { get; set; }
+        public DateTime? horoscope_from_date { get; set; }
         public string publish_content { get; set; }
         //Validate Active
         public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update

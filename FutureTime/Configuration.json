@@ -3,7 +3,7 @@
     "Database": {
       "HOST": "localhost",
       "PORT": 5432,
-      "NAME": "future_time",
+      "NAME": "future_time2",
       "PASSWORD": "12345"
     },
     "MongoDB": {

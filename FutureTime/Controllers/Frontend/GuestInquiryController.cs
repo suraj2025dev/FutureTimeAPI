@@ -200,6 +200,21 @@ namespace FutureTime.Controllers.Backend
                         }
                     }
 
+                    //Hor Time
+                    DateTime horoscope_from_date1 = DateTime.MinValue;
+                    if (qsn_cat_detail.category_type_id == 3)
+                    {
+                        if (dto.horoscope_from_date == "" || dto.horoscope_from_date == null)
+                        {
+                            throw new ErrorException("Please provide horospoce time prediction start date (horoscope_from_date).");
+                        }
+
+                        if (!DateTime.TryParse(dto.horoscope_from_date, out horoscope_from_date1))
+                        {
+                            throw new ErrorException("Please provide valid horoscope_from_date in format like 2024-01-01");
+                        }
+                    }
+
 
                     new_inquiry.inquiry_regular = new InquiryRegular { 
                         question_id = dto.inquiry_regular.question_id,
@@ -207,7 +222,8 @@ namespace FutureTime.Controllers.Backend
                         question=qsn_detail.question,
                         reading_activity = new List<InquiryReading> { },
                         auspicious_from_date = qsn_cat_detail.category_type_id == 3 ? auspicious_from_date1 : null,
-                        category_type_id=qsn_cat_detail.category_type_id
+                        horoscope_from_date = qsn_cat_detail.category_type_id == 3 ? horoscope_from_date1 : null,
+                        category_type_id =qsn_cat_detail.category_type_id
                     };
                 }
                 else
@@ -430,6 +446,7 @@ namespace FutureTime.Controllers.Backend
                                         s.profile1,
                                         s.profile2,
                                         s.inquiry_regular.auspicious_from_date,
+                                        s.inquiry_regular.horoscope_from_date,
                                         s.inquiry_regular.category_type_id,
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read,
