@@ -41,7 +41,7 @@ namespace User
                     user_email = data1.email,
                     last_interaction_time = DateTime.Now,
                     session_id = Guid.NewGuid(),
-                    user_id = Dao.ExecuteScalar<int>("select id from pms.tbl_user where lower(email)=@email", new { data1.email })
+                    user_id = ""// Dao.ExecuteScalar<int>("select id from pms.tbl_user where lower(email)=@email", new { data1.email })
                 });
                 response.data.Add("token", token);
             }

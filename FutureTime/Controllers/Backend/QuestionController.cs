@@ -29,7 +29,8 @@ namespace FutureTime.Controllers.Backend
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
-
+            if (!new List<int> { 1,2}.Contains(request.user_type_id))//Only Admin & support
+                throw new ErrorException("Not allowed");
         }
 
         

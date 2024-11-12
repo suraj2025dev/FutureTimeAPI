@@ -100,7 +100,8 @@ namespace Auth
     public class SessionPayload
     {
         public string user_email { get; set; }
-        public int user_id { get; set; }
+        public string user_id { get; set; }
+        public int user_type_id { get; set; }
         public string token { get; set; }
         public Guid session_id { get; set; }
         public DateTime last_interaction_time { get; set; }//Last time this token was used. A token created before session time out is set to auto expire.

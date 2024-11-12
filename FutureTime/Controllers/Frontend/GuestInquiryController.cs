@@ -202,7 +202,7 @@ namespace FutureTime.Controllers.Backend
 
                     //Hor Time
                     DateTime horoscope_from_date1 = DateTime.MinValue;
-                    if (qsn_cat_detail.category_type_id == 3)
+                    if (qsn_cat_detail.category_type_id == 1)
                     {
                         if (dto.horoscope_from_date == "" || dto.horoscope_from_date == null)
                         {
@@ -222,7 +222,7 @@ namespace FutureTime.Controllers.Backend
                         question=qsn_detail.question,
                         reading_activity = new List<InquiryReading> { },
                         auspicious_from_date = qsn_cat_detail.category_type_id == 3 ? auspicious_from_date1 : null,
-                        horoscope_from_date = qsn_cat_detail.category_type_id == 3 ? horoscope_from_date1 : null,
+                        horoscope_from_date = qsn_cat_detail.category_type_id == 1 ? horoscope_from_date1 : null,
                         category_type_id =qsn_cat_detail.category_type_id
                     };
                 }

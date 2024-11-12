@@ -204,7 +204,7 @@ if (true)
 
 FeedStaticData.Feed();
 
-
+app.UseMiddleware<ExceptionHandlingMiddleware>(); // Register the middleware
 
 app.MapControllers();
 

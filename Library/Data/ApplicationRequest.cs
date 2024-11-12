@@ -19,6 +19,7 @@ namespace Library.Data
         public string message { get; set; }
         public Dictionary<string, object> data { get; set; }
         public string user_id { get; set; }
+        public int user_type_id { get; set; }
         public string user_email { get; set; }
         public string ip_address { get; set; }
         public DateTime ac_date { get; set; }

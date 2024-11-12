@@ -28,7 +28,8 @@ namespace FutureTime.Controllers.Backend
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
-
+            if(request.user_type_id != 1)//Only Admin
+                throw new ErrorException("Not allowed");
         }
 
         

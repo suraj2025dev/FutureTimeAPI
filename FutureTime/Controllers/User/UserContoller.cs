@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using User;
 using User.Data;
 using static System.Net.WebRequestMethods;
+using FutureTime.MongoDB;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using FutureTime.MongoDB.Model;
 
 namespace FutureTime.Controllers.User
 {
@@ -33,8 +37,37 @@ namespace FutureTime.Controllers.User
         
         public IActionResult Login([FromBody] UserLoginDTO data)
         {
-            request.data.Add("data", data);
-            response = this.service.Login(request);
+            var col = MongoDBService.ConnectCollection<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel);
+
+            
+
+            var filter = Builders<UsersModel>.Filter.And(
+                                Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(data.email, "i")),
+                                Builders<UsersModel>.Filter.Eq("password", data.password),
+                                Builders<UsersModel>.Filter.Eq("active", true)
+                            );
+            var item = col.Find(filter).FirstOrDefaultAsync().Result;
+            
+            if(item == null)
+            {
+                return Ok(new ApplicationResponse { 
+                    error_code = "1",
+                    message = "Invalid credentials."
+                });
+            }
+            else
+            {
+                var token = SessionManagement.GenerateToken(new SessionPayload
+                {
+                    user_email = data.email,
+                    last_interaction_time = DateTime.Now,
+                    session_id = Guid.NewGuid(),
+                    user_id = item._id,
+                    user_type_id = item.user_type_id
+                });
+                response.data.Add("token", token);
+                response.data.Add("user_type_id", item.user_type_id);
+            }
             return Ok(response);
         }
 

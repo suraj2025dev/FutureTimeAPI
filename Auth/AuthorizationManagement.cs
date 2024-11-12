@@ -12,12 +12,15 @@ using System.Web.Mvc;
 using Library.Exceptions;
 using static System.Net.WebRequestMethods;
 using System.Web.Helpers;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using Auth.MongoRef;
 
 namespace Auth
 {
     public static class AuthorizationManagement
     {
-        public static ApplicationResponse ?ManageAuth(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext context)
+        public static ApplicationResponse ManageAuth(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext context)
         {
             ApplicationResponse ?response  = null;
             var controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
@@ -60,10 +63,14 @@ namespace Auth
 
                 context.HttpContext.Items["user_email"] = active_session.user_email;
                 context.HttpContext.Items["user_id"] = active_session.user_id;
+                context.HttpContext.Items["user_type_id"] = active_session.user_type_id;
 
+                //User from mongo
+                var user = GetUser(active_session.user_email);
+                
 
                 //If user is blocked/locked/inactivate. His session is terminated here.
-                if (Dao.ExecuteScalar<int>("SELECT COUNT(*) FROM pms.tbl_user WHERE lower(email)=lower(@user_email) AND is_active AND is_blocked=false", new { user_email = active_session.user_email }) == 0)
+                if (user == null)
                 {
                     SessionManagement.ClearUpSpecificSessionOfUser(active_session.user_email);
                     throw new Exception("Session Terminated");
@@ -83,6 +90,18 @@ namespace Auth
                 }
             }
             return response;
+        }
+
+        private static UsersModel? GetUser(string email)
+        {
+            var col = MongoDbRef.ConnectCollection<UsersModel>(MongoDbRef.COLLECTION_NAME.UsersModel);
+
+            var filter = Builders<UsersModel>.Filter.And(
+                            Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(email, "i")),
+                            Builders<UsersModel>.Filter.Eq("active", true)
+                        );
+            var item = col.Find(filter).FirstOrDefaultAsync().Result;
+            return item;
         }
     }
 }

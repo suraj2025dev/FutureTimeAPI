@@ -16,6 +16,8 @@ namespace FutureTime
         {
             request.user_email = GetUserDetail(contextAccessor,"user_email");
             request.user_id = GetUserDetail(contextAccessor,"user_id");
+            int.TryParse(GetUserDetail(contextAccessor, "user_type_id"),out int user_type_id);
+            request.user_type_id = user_type_id;
             request.ip_address = GetIPAddress(contextAccessor);
             return request;
         }
