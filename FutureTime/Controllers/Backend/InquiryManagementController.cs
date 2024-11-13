@@ -35,7 +35,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetInquiries")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> GetInquiries(string inquiry_state, string inquiry_status)
         {
             var _inquiry_status = inquiry_status == "pending" ? INQUIRY_STATUS.Pending : INQUIRY_STATUS.Completed;
@@ -87,7 +87,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("ChangeAssignee")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> ChangeAssignee([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -149,7 +149,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("PushComment")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> PushComment([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -202,7 +202,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetCommentHistory")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> GetCommentHistory(string inquiry_id)
         {
             try
@@ -237,7 +237,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("PublishInquiry")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> PublishInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -286,7 +286,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetAssigneeList")]
-        [AnonymousAuthorizeFilter]
+        
         public async Task<IActionResult> GetAssigneeList()
         {
             try
@@ -309,6 +309,59 @@ namespace FutureTime.Controllers.Backend
             return Ok(response);
 
         }
+
+        [HttpGet]
+        [Route("GetInquiriyByNumber")]
+        
+        public async Task<IActionResult> GetInquiriyByNumber(string inquiry_number)
+        { 
+            try
+            {
+                
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_number", inquiry_number)
+                                );
+
+
+                var items = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
+                                    .Find(filters).ToList()
+                                    .Select(s => new
+                                    {
+                                        inquiry_id = s._id,
+                                        s.inquiry_regular.question,
+                                        s.inquiry_regular.price,
+                                        s.inquiry_number,
+                                        payment_successfull = s.inquiry_payment_status == INQUIRY_PAYMENT_STATUS.Paid ? true : false,
+                                        purchased_on = s.created_date,
+                                        s.profile1,
+                                        s.profile2,
+                                        s.inquiry_regular.auspicious_from_date,
+                                        s.inquiry_regular.horoscope_from_date,
+                                        s.inquiry_regular.category_type_id,
+                                        //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
+                                        //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
+                                        //s.is_read,
+                                        assignee = GetUsers(s.assignee_id) == null ? "" : GetUsers(s.assignee_id).name,//TODO
+                                        s.comment_for_assignee,
+                                        s.final_reading
+                                    }).OrderByDescending(o => o.purchased_on).ToList();
+
+                if(items.Count() == 0)
+                {
+                    throw new ErrorException("Inquiry not found.");
+                }
+
+                response.data.Add("inquiry", items[0]);
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
 
         private INQUIRY_STATE GetEnumFromStatus(string status)
         {
