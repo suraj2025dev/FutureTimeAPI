@@ -16,6 +16,7 @@ using Library.Exceptions;
 using FutureTime.StaticData;
 using MongoDB.Bson;
 using FutureTime.MongoDB.Data;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -111,6 +112,9 @@ namespace FutureTime.Controllers.Backend
 
                 int skip = (data.page_number - 1) * data.page_size;
 
+                var all_users = await UsersHelper.GetAllUserAsync();
+
+
                 /*
                 public string name { get; set; }
                 public string email { get; set; }
@@ -161,6 +165,11 @@ namespace FutureTime.Controllers.Backend
 
                 var items = await col.Find(combinedFilter).Skip(skip)
                                         .Limit(data.page_size).ToListAsync();
+
+                items.ForEach(f => {
+                    f.updated_by = UsersHelper.GetUserName(all_users, f.updated_by);
+                    f.created_by = UsersHelper.GetUserName(all_users, f.created_by);
+                });
 
                 var totalCount = await col.CountDocumentsAsync(combinedFilter);
 
