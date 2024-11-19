@@ -15,6 +15,7 @@ using Library.Exceptions;
 using FutureTime.StaticData;
 using MongoDB.Bson;
 using Microsoft.VisualBasic;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -109,7 +110,7 @@ namespace FutureTime.Controllers.Backend
                 var category_items = await category_list.Find(new BsonDocument()).ToListAsync();
                 response.data.Add("question_category_items", category_items.ToList().Select(s=>new { 
                     question_category_id = s._id,
-                    question_category = s.category
+                    question_category = FTStaticData.GetName(STATIC_DATA_TYPE.CATEGORY_TYPE,s.category_type_id.ToString())+" : "+s.category
                 }).ToList());
             }
             catch (Exception ex)
@@ -208,11 +209,85 @@ namespace FutureTime.Controllers.Backend
             try
             {
                 var col = MongoDBService.ConnectCollection<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel);
+                var all_users = await UsersHelper.GetAllUserAsync();
 
 
-                var items = await col.Find(new BsonDocument()).ToListAsync();
+                //var items = await col.Find(new BsonDocument()).ToListAsync();
+                //items.ForEach(f => {
+                //    f.updated_by = UsersHelper.GetUserName(all_users, f.updated_by);
+                //    f.created_by = UsersHelper.GetUserName(all_users, f.created_by);
+                //});
 
-                response.data.Add("list", items);
+                //response.data.Add("list", items);
+
+                var pipeline = new[]
+                {
+                    new BsonDocument
+                    {
+                        { "$addFields", new BsonDocument
+                            {
+                                { "question_category_id", new BsonDocument("$toObjectId", "$question_category_id") }
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$lookup", new BsonDocument
+                            {
+                                { "from", "QuestionCategoryModel" }, // Target collection name
+                                { "localField", "question_category_id" }, // Field in QuestionModel
+                                { "foreignField", "_id" }, // Field in QuestionCategoryModel
+                                { "as", "category_details" } // Result field
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$unwind", new BsonDocument
+                            {
+                                { "path", "$category_details" },
+                                { "preserveNullAndEmptyArrays", true } // Allow questions without categories
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$project", new BsonDocument
+                            {
+                                { "_id", 1 },
+                                { "updated_date", 1 },
+                                { "updated_by", 1 },
+                                { "created_date", 1 },
+                                { "created_by", 1 },
+                                { "question", 1 },
+                                { "order_id", 1 },
+                                { "question_category_id", 1 },
+                                { "active", 1 },
+                                { "price", 1 },
+                                { "category_name", "$category_details.category" } // Include category name
+                            }
+                        }
+                    }
+                };
+
+                var result = await col.Aggregate<BsonDocument>(pipeline).ToListAsync();
+                var mappedResult = result.Select(doc => new
+                {
+                    _id = doc["_id"].AsObjectId.ToString(),
+                    updated_date = doc["updated_date"].ToUniversalTime(),
+                    updated_by = UsersHelper.GetUserName(all_users, doc["updated_by"].AsString),
+                    created_date = doc["created_date"].ToUniversalTime(),
+                    created_by = UsersHelper.GetUserName(all_users, doc["created_by"].AsString),
+                    question = doc["question"].AsString,
+                    order_id = doc["order_id"].AsInt32,
+                    question_category_id = doc["question_category_id"].AsObjectId.ToString(),
+                    active = doc["active"].AsBoolean,
+                    price = Convert.ToDecimal(doc["price"].AsString),
+                    question_category_name = doc.GetValue("category_name", BsonNull.Value)?.AsString
+                }).ToList();
+
+                response.data.Add("list", mappedResult);
+
             }
             catch (Exception ex)
             {

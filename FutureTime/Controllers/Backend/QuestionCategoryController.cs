@@ -15,6 +15,7 @@ using Library.Exceptions;
 using FutureTime.StaticData;
 using MongoDB.Bson;
 using Microsoft.VisualBasic;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -184,11 +185,26 @@ namespace FutureTime.Controllers.Backend
             try
             {
                 var col = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel);
-
+                
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
+                var all_users = await UsersHelper.GetAllUserAsync();
 
-                response.data.Add("list", items);
+                var final_items = items.Select(s => new
+                {
+                    s._id,
+                    active = s.active,
+                    category = s.category,
+                    category_type_id = s.category_type_id,
+                    category_type = FTStaticData.GetName(STATIC_DATA_TYPE.CATEGORY_TYPE, s.category_type_id.ToString()),
+                    created_by = UsersHelper.GetUserName(all_users, s.created_by),
+                    created_date = s.created_date,
+                    order_id = s.order_id,
+                    updated_by = UsersHelper.GetUserName(all_users, s.updated_by),
+                    updated_date = s.updated_date
+                }).ToList();
+
+                response.data.Add("list", final_items);
             }
             catch (Exception ex)
             {

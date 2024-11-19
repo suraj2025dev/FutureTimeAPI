@@ -3,6 +3,12 @@
     public static class FTStaticData
     {
         public static List<StaticData> data { get; set; }
+
+        public static string GetName(STATIC_DATA_TYPE type, string id)
+        {
+            var name = FTStaticData.data.Where(w => w.type == type).Select(s => s.list).ToList().First().Where(w1=>w1.id == id).Select(s1=>s1.name).FirstOrDefault();
+            return name ?? "";
+        }
     }
 
     public enum STATIC_DATA_TYPE

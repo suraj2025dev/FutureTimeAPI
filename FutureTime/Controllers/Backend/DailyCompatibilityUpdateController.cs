@@ -15,6 +15,7 @@ using Library.Extensions;
 using Library.Exceptions;
 using FutureTime.StaticData;
 using MongoDB.Bson;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -181,9 +182,14 @@ namespace FutureTime.Controllers.Backend
             try
             {
                 var col = MongoDBService.ConnectCollection<DailyCompatibilityUpdateModel>(MongoDBService.COLLECTION_NAME.DailyCompatibilityUpdateModel);
-
+                var all_users = await UsersHelper.GetAllUserAsync();
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
+
+                items.ForEach(f => {
+                    f.updated_by = UsersHelper.GetUserName(all_users, f.updated_by);
+                    f.created_by = UsersHelper.GetUserName(all_users, f.created_by);
+                });
 
                 response.data.Add("list", items);
             }
