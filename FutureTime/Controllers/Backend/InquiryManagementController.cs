@@ -16,6 +16,8 @@ using FutureTime.StaticData;
 using MongoDB.Bson;
 using Microsoft.VisualBasic;
 using FutureTime.MongoDB.Data;
+using MongoDB.Driver.Linq;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -30,51 +32,126 @@ namespace FutureTime.Controllers.Backend
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
-            request.user_id = "123";
+            //request.user_id = "123";
         }
 
         [HttpGet]
         [Route("GetInquiries")]
-        
-        public async Task<IActionResult> GetInquiries(string inquiry_state, string inquiry_status)
+
+        public async Task<IActionResult> GetInquiries(
+            string inquiry_state = null, 
+            string inquiry_status = null,
+            string inquiry_number = null,
+            string inquiry_date = null,//YYYY-MM-DD
+            int? inquiry_payment_status = null,//0: pending, 1: paid, 2:failed
+            int? category_type_id = null,
+            string question_id = null,
+            string assignee_id = null,
+            int page_number = 1,
+            int page_size = 100
+            )
         {
-            var _inquiry_status = inquiry_status == "pending" ? INQUIRY_STATUS.Pending : INQUIRY_STATUS.Completed;
-            var _inquiry_state = GetEnumFromStatus(inquiry_state);
+
+            int skip = (page_number - 1) * page_size;
+
             try
             {
                 //var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
 
                 var filters = Builders<StartInquiryProcessModel>.Filter.And(
-                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
-                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_status", _inquiry_status),
-                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_state", _inquiry_state)
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true)
                                 );
 
+                if(inquiry_state != null)
+                {
+                    var _inquiry_state = GetEnumFromStatus(inquiry_state);
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_state", _inquiry_state);
+                }
 
-                var items = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
-                                    .Find(filters).ToList()
-                                    .Select(s => new
-                                    {
-                                        inquiry_id = s._id,
-                                        s.inquiry_regular.question,
-                                        s.inquiry_regular.price,
-                                        s.inquiry_number,
-                                        payment_successfull = s.inquiry_payment_status == INQUIRY_PAYMENT_STATUS.Paid ? true : false,
-                                        purchased_on = s.created_date,
-                                        s.profile1,
-                                        s.profile2,
-                                        s.inquiry_regular.auspicious_from_date,
-                                        s.inquiry_regular.horoscope_from_date,
-                                        s.inquiry_regular.category_type_id,
-                                        //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
-                                        //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
-                                        //s.is_read,
-                                        assignee = GetUsers(s.assignee_id)==null?"":GetUsers(s.assignee_id).name,//TODO
-                                        s.comment_for_assignee,
-                                        s.final_reading
-                                    }).OrderByDescending(o => o.purchased_on).ToList();
+                if (inquiry_status != null)
+                {
+                    var _inquiry_status = inquiry_status == "pending" ? INQUIRY_STATUS.Pending : INQUIRY_STATUS.Completed;
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_status", _inquiry_status);
+                }
 
+                if (inquiry_number != null)
+                {
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_number", inquiry_number);
+                }
+
+                if (inquiry_date != null)
+                {
+                    DateTime.TryParse(inquiry_date, out DateTime _transaction_date);
+
+                    if (_transaction_date == DateTime.MinValue)
+                    {
+                        throw new ErrorException("Enter valid date i.e yyyy-MM-dd.");
+                    }
+
+                    DateTime startOfDay = _transaction_date.Date; // Midnight (00:00:00)
+                    DateTime endOfDay = startOfDay.AddDays(1).AddTicks(-1); // Last moment of the day (23:59:59.999)
+
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Gte("created_date", startOfDay) &
+                                        Builders<StartInquiryProcessModel>.Filter.Lte("created_date", endOfDay);
+                }
+
+                if (inquiry_payment_status != null)
+                {
+                    var _inquiry_payment_status = (INQUIRY_PAYMENT_STATUS)Enum.ToObject(typeof(INQUIRY_PAYMENT_STATUS), inquiry_payment_status);
+
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_payment_status", _inquiry_payment_status);
+                }
+
+                if (category_type_id != null)
+                {
+                   filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq(x => x.inquiry_regular.category_type_id, category_type_id);
+                }
+
+                if (question_id != null)
+                {
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq(x => x.inquiry_regular.question_id, question_id);
+                }
+
+                if (assignee_id != null)
+                {
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq(x => x.assignee_id, assignee_id);
+                }
+
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+                var items = col
+                            .Find(filters)
+                            .Skip(skip)
+                            .Limit(page_size)
+                            .ToList()
+                            .Select(s => new
+                            {
+                                inquiry_id = s._id,
+                                s.inquiry_regular.question,
+                                s.inquiry_regular.price,
+                                s.inquiry_number,
+                                payment_successfull = s.inquiry_payment_status == INQUIRY_PAYMENT_STATUS.Paid ? true : false,
+                                inquiry_status = Enum.GetName(typeof(INQUIRY_STATUS), s.inquiry_status),
+                                inquiry_state = Enum.GetName(typeof(INQUIRY_STATE), s.inquiry_state),
+                                purchased_on = s.created_date,
+                                s.profile1,
+                                s.profile2,
+                                s.inquiry_regular.auspicious_from_date,
+                                s.inquiry_regular.horoscope_from_date,
+                                s.inquiry_regular.category_type_id,
+                                //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
+                                //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
+                                //s.is_read,
+                                assignee = GetUsers(s.assignee_id)==null?"":GetUsers(s.assignee_id).name,//TODO
+                                s.comment_for_assignee,
+                                s.final_reading,
+                                s.created_date,
+                                //s.created_by,
+                                //s.updated_by,
+                                s.updated_date
+                            }).OrderByDescending(o => o.purchased_on).ToList();
+                var totalCount = await col.CountDocumentsAsync(filters);
                 response.data.Add("list", items);
+                response.data.Add("total_count", totalCount);
             }
             catch (Exception ex)
             {
@@ -167,6 +244,11 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Can not post comment in completed inquiry");
                 }
 
+                if(col.Find(filters).FirstOrDefault().assignee_id != request.user_id)
+                {
+                    throw new ErrorException("Assigned person must push the comment.");
+                }
+
                 var reading_activity = new InquiryReading
                 {
                     assignee_id = col.Find(filters).FirstOrDefault().assignee_id,
@@ -217,7 +299,7 @@ namespace FutureTime.Controllers.Backend
                 var item = col.Find(filters).FirstOrDefault();
 
                 var comment = item.inquiry_regular.reading_activity.Select(s => new { 
-                    assignee = GetUsers(s.assignee_id).name,
+                    assignee = GetUsers(s.assignee_id) == null ? "" : GetUsers(s.assignee_id).name,
                     s.description,
                     s.updated_on
                 }).OrderByDescending(o=>o.updated_on).ToList();
@@ -352,6 +434,95 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 response.data.Add("inquiry", items[0]);
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+        [HttpGet]
+        [Route("GetFilterForInquiry")]
+
+        public async Task<IActionResult> GetFilterForInquiry()
+        {
+            try
+            {
+                var category_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.CATEGORY_TYPE).Select(s => s.list).First().ToList();
+
+                response.data.Add("category_type", category_type);
+
+                var col = MongoDBService.ConnectCollection<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel);
+
+                var items = await col.Find(new BsonDocument()).ToListAsync();
+
+                response.data.Add("assignee_list", items.Where(w => w.user_type_id >= 3).Select(s => new { 
+                    s._id,
+                    s.name
+                }).ToList());
+
+                #region GetQuestionWithCat
+                var pipeline = new[]
+                 {
+                    new BsonDocument
+                    {
+                        { "$addFields", new BsonDocument
+                            {
+                                { "question_category_id", new BsonDocument("$toObjectId", "$question_category_id") }
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$lookup", new BsonDocument
+                            {
+                                { "from", "QuestionCategoryModel" }, // Target collection name
+                                { "localField", "question_category_id" }, // Field in QuestionModel
+                                { "foreignField", "_id" }, // Field in QuestionCategoryModel
+                                { "as", "category_details" } // Result field
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$unwind", new BsonDocument
+                            {
+                                { "path", "$category_details" },
+                                { "preserveNullAndEmptyArrays", true } // Allow questions without categories
+                            }
+                        }
+                    },
+                    new BsonDocument
+                    {
+                        { "$project", new BsonDocument
+                            {
+                                { "_id", 1 },
+                                { "question", 1 },
+                                { "question_category_id", 1 },
+                                { "category_name", "$category_details.category" }, // Include category name
+                                { "category_type_id", "$category_details.category_type_id" } // Include category name
+                            }
+                        }
+                    }
+                };
+
+                var result = await MongoDBService.ConnectCollection<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel).Aggregate<BsonDocument>(pipeline).ToListAsync();
+                var mappedResult = result.Select(doc => new
+                {
+                    _id = doc["_id"].AsObjectId.ToString(),
+                    question = doc["question"].AsString,
+                    question_category_id = doc["question_category_id"].AsObjectId.ToString(),
+                    question_category_name = doc.GetValue("category_name", BsonNull.Value)?.AsString,
+                    category_type_id = doc.GetValue("category_type_id", BsonNull.Value)?.AsInt32,
+                    category_type = FTStaticData.GetName(STATIC_DATA_TYPE.CATEGORY_TYPE, (doc.GetValue("category_type_id", BsonNull.Value)?.AsInt32).ToString())
+                }).ToList();
+                response.data.Add("question", mappedResult);
+
+
+                #endregion
             }
             catch (Exception ex)
             {
