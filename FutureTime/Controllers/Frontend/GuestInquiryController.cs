@@ -451,7 +451,8 @@ namespace FutureTime.Controllers.Backend
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read,
                                         s.final_reading,
-                                        final_reading_on = (DateTime?)(s.is_read ? s.updated_date : null)
+                                        final_reading_on = (DateTime?)(s.is_read ? s.updated_date : null),
+                                        s.rating
                                     }).OrderByDescending(o=>o.purchased_on).ToList();
 
                 response.data.Add("inquiries", inquiries);
@@ -498,6 +499,100 @@ namespace FutureTime.Controllers.Backend
                 _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, inquiry_id, request.user_id);
 
                 response.message = "Marked as read.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+
+        }
+
+        [GuestAuthFilter]
+        [HttpGet]
+        [Route("RateInquiry")]
+        public async Task<IActionResult> RateInquiry(string inquiry_id, int rating)
+        {
+            if (request.guest_id == null)
+            {
+                response = new ApplicationResponse("401");
+
+                return StatusCode(401, response);
+            }
+
+            if(rating>=1 && rating <= 5)
+            {
+
+            }
+            else
+            {
+                response.error_code = "1";
+                response.status = "500";
+                response.message = "Please rate between 1 to 5.";
+                return StatusCode(500, response);
+            }
+
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("guest_id", request.guest_id),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", inquiry_id)
+                                );
+
+                var update = Builders<StartInquiryProcessModel>.Update
+                    .Set(i => i.rating, rating)
+                    .Set(i => i.updated_by, request.guest_id)
+                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
+
+                var result = await col.UpdateOneAsync(filters, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, inquiry_id, request.user_id);
+
+                response.message = "Rating updated.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+
+        }
+
+        [GuestAuthFilter]
+        [HttpGet]
+        [Route("TotalUnreadMessage")]
+        public async Task<IActionResult> TotalUnreadMessage()
+        {
+            if (request.guest_id == null)
+            {
+                response = new ApplicationResponse("401");
+
+                return StatusCode(401, response);
+            }
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("guest_id", request.guest_id),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("is_read", false),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_state", INQUIRY_STATE.Published)
+                                );
+
+                var items = await col.Find(filters).ToListAsync();
+
+                response.message = "";
+                response.data.Add("total_unread_message", items.Count());
 
             }
             catch (Exception ex)
