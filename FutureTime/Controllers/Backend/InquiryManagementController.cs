@@ -120,8 +120,10 @@ namespace FutureTime.Controllers.Backend
                 var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
                 var items = col
                             .Find(filters)
+                            .ToList()
+                            .OrderByDescending(o => o.updated_date)
                             .Skip(skip)
-                            .Limit(page_size)
+                            .Take(page_size)
                             .ToList()
                             .Select(s => new
                             {
@@ -148,7 +150,7 @@ namespace FutureTime.Controllers.Backend
                                 //s.created_by,
                                 //s.updated_by,
                                 s.updated_date
-                            }).OrderByDescending(o => o.purchased_on).ToList();
+                            }).ToList();
                 var totalCount = await col.CountDocumentsAsync(filters);
                 response.data.Add("list", items);
                 response.data.Add("total_count", totalCount);
@@ -461,7 +463,8 @@ namespace FutureTime.Controllers.Backend
 
                 response.data.Add("assignee_list", items.Where(w => w.user_type_id >= 3).Select(s => new { 
                     s._id,
-                    s.name
+                    s.name,
+                    s.user_type_id
                 }).ToList());
 
                 #region GetQuestionWithCat
