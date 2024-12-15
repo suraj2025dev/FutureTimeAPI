@@ -451,7 +451,7 @@ namespace FutureTime.Controllers.Backend
                                         is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
                                         s.is_read,
                                         s.final_reading,
-                                        final_reading_on = (DateTime?)(s.is_read ? s.updated_date : null),
+                                        final_reading_on = (DateTime?)(s.inquiry_state == INQUIRY_STATE.Published ? s.updated_date : null),
                                         s.rating
                                     }).OrderByDescending(o=>o.purchased_on).ToList();
 
