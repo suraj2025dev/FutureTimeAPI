@@ -174,6 +174,15 @@ namespace FutureTime.Controllers.Backend
                     }
                 }
 
+                if (data.discount_amount > 0)
+                {
+                    data.price = data.price_before_discount - data.discount_amount;
+                    if (data.price < 0)
+                    {
+                        throw new ErrorException("Discount too high.");
+                    }
+                }
+
                 #region Check question Name Exists in other id
                 var c_filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
                 var idFilter = Builders<QuestionModel>.Filter.Ne("_id", data._id);
@@ -221,6 +230,7 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.order_id, data.order_id)
                      .Set(u => u.price_before_discount, data.price_before_discount)
                      .Set(u => u.is_initial_offerings, data.is_initial_offerings)
+                     .Set(u=> u.image_blob,data.image_blob)
                      .Set(u => u.is_bundle, data.is_bundle)
                      .Set(u => u.effective_from, data.effective_from)
                      .Set(u => u.effective_to, data.effective_to)

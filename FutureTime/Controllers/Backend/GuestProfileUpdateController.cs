@@ -17,6 +17,7 @@ using FutureTime.StaticData;
 using MongoDB.Bson;
 using FutureTime.MongoDB.Data;
 using FutureTime.Helper;
+using FutureTime.Service;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -87,7 +88,7 @@ namespace FutureTime.Controllers.Backend
                 }
                 _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, data.guest_id, request.user_id);
 
-
+                await new FirebaseService().PushNotificationAsync("Profile Verified", "Your profile has been verified.", null, data.guest_id);
 
                 //col.InsertOne(data);
                 response.message = "Guest profile updated.";

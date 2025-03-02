@@ -254,7 +254,7 @@ namespace FutureTime.Controllers.Backend
         [AnonymousAuthorizeFilter]
         [HttpGet]
         [Route("ValidateOTP")]
-        public async Task<IActionResult> ValidateOTP(string email, string otp)
+        public async Task<IActionResult> ValidateOTP(string email, string otp, string device_token, bool is_android)
         {
             try
             {
@@ -276,7 +276,9 @@ namespace FutureTime.Controllers.Backend
 
                 update = Builders<GuestsModel>.Update
                     .Set(u => u.otp, null)//Reset OTP
-                    .Set(u => u.token, token);
+                    .Set(u => u.token, token)
+                    .Set(u=> u.device_token, device_token)
+                    .Set(u => u.device_type, is_android?"android":"ios");
 
                 var result = await col.UpdateOneAsync(guestDataFilter, update);
 

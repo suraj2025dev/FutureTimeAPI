@@ -18,6 +18,7 @@ using Microsoft.VisualBasic;
 using FutureTime.MongoDB.Data;
 using MongoDB.Driver.Linq;
 using FutureTime.Helper;
+using FutureTime.Service;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -212,7 +213,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, dto.inquiry_id , request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id , request.user_id);
 
                 response.message = "Inquiry Assigned.";
 
@@ -270,7 +271,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, dto.inquiry_id, request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
 
                 response.message = "Comment Pushed.";
 
@@ -354,7 +355,15 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<DailyAuspiciousTimeUpdateModel>(MongoDBService.COLLECTION_NAME.DailyAuspiciousTimeUpdateModel, dto.inquiry_id, request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
+
+                var inq = col.Find(filters).FirstOrDefault();
+
+                var dict = new Dictionary<string, string>();
+                dict.Add("inquiry_id", inq._id);
+                dict.Add("inquiry_number", inq.inquiry_number);
+                dict.Add("question", inq.inquiry_regular.question);
+                new FirebaseService().PushNotificationAsync("Inquiry", "You got a reply.", dict, inq.guest_id);
 
                 response.message = "Published to the user.";
 

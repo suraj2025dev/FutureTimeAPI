@@ -16,6 +16,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 using FutureTime.MongoDB;
 using Microsoft.Extensions.Options;
 using FutureTime.StaticData;
+using FutureTime.Service;
 
 var isService = false;
 

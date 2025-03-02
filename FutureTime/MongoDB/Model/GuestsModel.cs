@@ -19,6 +19,8 @@ namespace FutureTime.MongoDB.Model
         public string? token { get; set; }
         public string? otp { get; set; }
         public bool active { get; set; }
+        public string device_token { get; set; }
+        public string device_type { get; set; }
         public GuestsProfileModel? guest_profile { get; set; }
     }
 
