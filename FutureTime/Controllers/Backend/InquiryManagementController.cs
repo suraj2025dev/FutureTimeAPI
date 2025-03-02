@@ -363,7 +363,7 @@ namespace FutureTime.Controllers.Backend
                 dict.Add("inquiry_id", inq._id);
                 dict.Add("inquiry_number", inq.inquiry_number);
                 dict.Add("question", inq.inquiry_regular.question);
-                new FirebaseService().PushNotificationAsync("Inquiry", "You got a reply.", dict, inq.guest_id);
+                await new FirebaseService().PushNotificationAsync("Inquiry", "You got a reply.", dict, inq.guest_id);
 
                 response.message = "Published to the user.";
 

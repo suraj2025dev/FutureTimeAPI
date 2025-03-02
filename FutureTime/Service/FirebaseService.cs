@@ -66,8 +66,13 @@
                 Token = item.device_token,
             };
 
-            var messaging = FirebaseMessaging.DefaultInstance;
-            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            try
+            {
+                var messaging = FirebaseMessaging.DefaultInstance;
+                var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            }
+            catch { 
+            }
             return true;
         }
     }
