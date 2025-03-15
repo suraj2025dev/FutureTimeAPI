@@ -19,6 +19,7 @@ using FutureTime.MongoDB.Data;
 using MongoDB.Driver.Linq;
 using FutureTime.Helper;
 using FutureTime.Service;
+using System.Text.Json;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -545,6 +546,148 @@ namespace FutureTime.Controllers.Backend
 
         }
 
+        [HttpGet]
+        [Route("CallVedicAPI")]
+
+        public async Task<IActionResult> CallVedicAPI(string inquiry_id, string vedic_api_type_id)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", inquiry_id)
+                                );
+                var item = col.Find(filters).FirstOrDefault();
+
+                #region guest
+                var col_guest = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
+
+                var filters_guest = Builders<GuestsModel>.Filter.And(
+                                    Builders<GuestsModel>.Filter.Eq("active", true),
+                                    Builders<GuestsModel>.Filter.Eq("_id", item.guest_id)
+                                );
+                var guest = (col_guest.Find(filters_guest).First());
+                #endregion
+
+                var vedic_api_response = item.vedic_api_response_list;
+
+                if(vedic_api_response == null)
+                {
+                    vedic_api_response = new List<VedicAPIResponse>();
+                }
+
+
+                if (vedic_api_type_id == "1")
+                {
+                    var a= await VedicAPIConnection.APICall.GetPlanetDetail(
+                            DateTime.Now,
+                            guest.tob,
+                            guest.city.lat,
+                            guest.city.lng,
+                            guest.gmt.ToString()
+                        );
+
+                    
+                    var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
+                    if (index > -1) {
+                        vedic_api_response[index] = new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        };
+                    }
+                }
+                else if (vedic_api_type_id == "2")
+                {
+                   //TODO
+                }
+                else if (vedic_api_type_id == "3")
+                {
+                    var a = await VedicAPIConnection.APICall.GetPanchang(
+                           DateTime.Now,//TODO 
+                           guest.tob,
+                           guest.city.lat,
+                           guest.city.lng,
+                           guest.gmt.ToString()
+                       );
+
+
+                    var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
+                    if (index > -1)
+                    {
+                        vedic_api_response[index] = new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        };
+                    }
+                }
+                else if (vedic_api_type_id == "4")
+                {
+                    var a = await VedicAPIConnection.APICall.GetMahadasha(
+                           DateTime.Now,//TODO 
+                           guest.tob,
+                           guest.city.lat,
+                           guest.city.lng,
+                           guest.gmt.ToString()
+                       );
+
+
+                    var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
+                    if (index > -1)
+                    {
+                        vedic_api_response[index] = new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        };
+                    }
+                }
+
+                var update = Builders<StartInquiryProcessModel>.Update
+                    .Set(i => i.vedic_api_response_list, vedic_api_response)
+                    .Set(i => i.updated_by, request.user_id)
+                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
+
+                var result = await col.UpdateOneAsync(filters, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
+
+                response.message = "Comment Pushed.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+        [HttpGet]
+        [Route("GetVedicAPIType")]
+        public IActionResult GetVedicAPIType()
+        {
+            try
+            {
+                var vedic_api_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.VEDIC_API_TYPE).Select(s => s.list).First();
+                response.data.Add("vedic_api_type", vedic_api_type);
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
 
         private INQUIRY_STATE GetEnumFromStatus(string status)
         {

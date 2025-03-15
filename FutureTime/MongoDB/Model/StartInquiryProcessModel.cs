@@ -54,6 +54,7 @@ namespace FutureTime.MongoDB.Model
         public InquiryBundle inquiry_bundle { get; set; }
         public InqurityGuestProfile profile1 { get; set; }
         public InqurityGuestProfile profile2 { get; set; }
+        public List<VedicAPIResponse> vedic_api_response_list { get; set; }
         public bool is_read { get; set; }
         public string final_reading { get; set; }
         public int rating { get; set; }
@@ -101,6 +102,12 @@ namespace FutureTime.MongoDB.Model
         public string city_id { get; set; }
         public string dob { get; set; }
         public string tob { get; set; }
+    }
+
+    public class VedicAPIResponse
+    {
+        public string vedic_api_type_id { get; set; }
+        public string vedic_api_response { get; set; }
     }
 
 }

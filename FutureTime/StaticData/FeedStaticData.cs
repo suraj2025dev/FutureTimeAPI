@@ -148,6 +148,36 @@
                 }
             });
             #endregion
+
+            #region VEDIC API TYPE
+            FTStaticData.data.Add(new StaticData
+            {
+                type = STATIC_DATA_TYPE.VEDIC_API_TYPE,
+                list = new List<StaticDataList>
+                {
+                    new StaticDataList
+                    {
+                        id = "1",
+                        name = "Horoscope Planet Detail (Current)"
+                    },
+                    new StaticDataList
+                    {
+                        id = "2",
+                        name = "Matching North Match With Astro"
+                    },
+                    new StaticDataList
+                    {
+                        id = "3",
+                        name = "Panchang"
+                    },
+                    new StaticDataList
+                    {
+                        id = "4",
+                        name = "Dasha Current Maha Dasha Full"
+                    }
+                }
+            });
+            #endregion
         }
     }
 }

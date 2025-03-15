@@ -15,7 +15,8 @@
     {
         RASHI,
         USER_TYPE,
-        CATEGORY_TYPE
+        CATEGORY_TYPE,
+        VEDIC_API_TYPE
     }
 
     public class StaticData
