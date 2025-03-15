@@ -27,6 +27,7 @@ namespace FutureTime.MongoDB
             DataLogModel,
             StartInquiryProcessModel,
             CityListModal,
+            APICallLogModel,
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)

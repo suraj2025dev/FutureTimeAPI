@@ -116,7 +116,7 @@ namespace FutureTime.Controllers.Backend
 
                 var guest = col.Find(filter).First();
 
-                var planet_detail = await APIConnection.APICall.GetPlanetDetails(
+                var planet_detail = await VedicAPIConnection.APICall.GetPlanetDetail(
                         DateTime.Parse(guest.dob),
                         guest.tob,
                         guest.city.lng,
