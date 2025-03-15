@@ -102,7 +102,55 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+        [HttpPost]
+        [Route("PlanetDetailAPIForGuest")]
+        public async Task<IActionResult> PlanetDetailAPIForGuest(string guest_id)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
+
+
+                //Check if date already exists
+                var filter = Builders<GuestsModel>.Filter.Eq("_id", guest_id);
+
+                var guest = col.Find(filter).First();
+
+                var planet_detail = await APIConnection.APICall.GetPlanetDetails(
+                        DateTime.Parse(guest.dob),
+                        guest.tob,
+                        guest.city.lng,
+                        guest.city.lat,
+                        guest.gmt.ToString(),
+                        "en"
+                    );
+
+                UpdateDefinition<GuestsModel> update;
+                update = Builders<GuestsModel>.Update
+                    .Set(u => u.api_planet_detail, planet_detail.ToString());
+
+                var result = await col.UpdateOneAsync(filter, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, guest_id, request.user_id);
+
+
+                //col.InsertOne(data);
+                response.message = "Planet Detail Fetched.";
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+
+            return Ok(response);
+
+        }
+
+
         [HttpGet]
         [Route("GetAllGuestProfile")]
         public async Task<IActionResult> GetAllGuestProfile(GetAllGuestProfileDTO data)

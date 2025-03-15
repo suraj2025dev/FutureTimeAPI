@@ -10,6 +10,7 @@
         public MongoDB MongoDB { get; set; }
         public Email Email { get; set; }
         public int SessionTimeOut { get; set; }
+        public VedicAPI VedicAPI { get; set; }
     }
     public class MongoDB
     {
@@ -33,4 +34,11 @@
         public int SecureSocketOptions { get; set; }
         public string SenderName { get; set; }
     }
+
+    public class VedicAPI
+    {
+        public string URL { get; set; }
+        public string apiKey { get; set; }
+    }
+
 }

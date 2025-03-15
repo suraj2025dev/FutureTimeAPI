@@ -24,6 +24,7 @@ namespace FutureTime.MongoDB.Model
         public string device_type { get; set; }
         public GuestsProfileModel? guest_profile { get; set; }
         public CityListModal city { get; set; }
+        public string api_planet_detail { get; set; }
     }
 
 }

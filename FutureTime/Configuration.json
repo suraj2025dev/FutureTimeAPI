@@ -13,10 +13,14 @@
     "Email": {
       "Host": "smtp.gmail.com",
       "Port": 587,
-      "Password": "qdwr xuax spkn iehk", //have to change this passqword according to the device|| for now static app password of below email
-      "Mail": "sabinbadal98@gmail.com", //email through which the mail is being sent
+      "Password": "qdwr xuax spkn iehk", 
+      "Mail": "sabinbadal98@gmail.com", 
       "SecureSocketOptions": 3,
       "SenderName": "Future TIme"
+    },
+    "VedicAPI": {
+      "URL": "https://api.vedicastroapi.com/v3-json",
+      "apiKey": "33456ade-cb0b-535e-ba1d-f3716a106411"
     },
     "SessionTimeOut": 1000
   }
