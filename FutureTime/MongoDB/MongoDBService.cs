@@ -21,11 +21,12 @@ namespace FutureTime.MongoDB
             QuestionModel,
             DailyAuspiciousTimeUpdateModel,
             GuestsModel,
-            CitiesModel,
+            CitiesModel,//NOT IN USE
             DailyCompatibilityUpdateModel,
             BundleModel,
             DataLogModel,
-            StartInquiryProcessModel
+            StartInquiryProcessModel,
+            CityListModal,
         }
 
         public static IMongoCollection<T>ConnectCollection<T>(COLLECTION_NAME collection_name)

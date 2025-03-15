@@ -317,7 +317,48 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+        [AnonymousAuthorizeFilter]
+        [HttpGet]
+        [Route("SearchCountry")]
+        public IActionResult SearchCountry(string search_param)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<CityListModal>(MongoDBService.COLLECTION_NAME.CityListModal);
+
+                //var obj_id = new ObjectId(request.guest_id);
+
+                if (string.IsNullOrWhiteSpace(search_param))
+                    return BadRequest("Search parameter cannot be empty.");
+
+                search_param = search_param.ToLower();
+                var filter = Builders<CityListModal>.Filter.Or(
+                     Builders<CityListModal>.Filter.Regex("city_ascii", new BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("country", new BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso2", new BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso3", new BsonRegularExpression(search_param, "i"))
+                 );
+                var results = col.Find(filter).Limit(1000).ToList();
+
+                return Ok(results.Select(s=>new { 
+                    id=s._id,
+                    city=s.city_ascii,
+                    s.country,
+                    s.lat,
+                    s.lng,
+                    s.iso2,
+                    s.iso3
+                }));
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+
+        }
+
+
 
         [GuestAuthFilter]
         [HttpGet]
