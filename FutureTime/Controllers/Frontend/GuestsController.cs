@@ -42,6 +42,8 @@ namespace FutureTime.Controllers.Backend
             {
                 var col = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
 
+                
+
                 var otp = GenerateOTP();
 
                 if (data.is_login)
@@ -75,6 +77,26 @@ namespace FutureTime.Controllers.Backend
                 }
                 else
                 {
+                    if(data.gmt<-12 || data.gmt > 14)
+                    {
+                        throw new ErrorException("GMT must be between -12.00 to 14.00");
+                    }
+
+                    var col_city = MongoDBService.ConnectCollection<CityListModal>(MongoDBService.COLLECTION_NAME.CityListModal);
+                    CityListModal city = null;
+                    try
+                    {
+                        city = col_city.Find(Builders<CityListModal>.Filter.Eq("_id", new ObjectId(data.city_id))).FirstOrDefault();
+                        if (city == null)
+                        {
+                            throw new ErrorException("Choose valid city.");
+                        }
+                    }
+                    catch
+                    {
+                        throw new ErrorException("Choose valid city.");
+                    }
+
                     var filter = Builders<GuestsModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i"));
                     var guestData = col.Find(filter).ToList();
 
@@ -135,6 +157,8 @@ namespace FutureTime.Controllers.Backend
                         token = null,
                         created_date = DateTime.Now,
                         updated_date = DateTime.Now,
+                        gmt = data.gmt,
+                        city= city
                         //created_by = request.user_id,
                         //updated_by = request.user_id,
                     };
@@ -386,7 +410,8 @@ namespace FutureTime.Controllers.Backend
                     dob=item.dob,
                     tob=item.tob,
                     city_id=item.city_id,
-                    city="",
+                    city=item.city,
+                    gmt=item.gmt,
                     guest_profile = item.guest_profile == null ? null 
                         : new {
                             basic_description=item.guest_profile.basic_description,
@@ -428,13 +453,35 @@ namespace FutureTime.Controllers.Backend
                 var filter = Builders<GuestsModel>.Filter.Eq("_id", obj_id);
                 var item = await col.Find(filter).FirstOrDefaultAsync();
 
+                var col_city = MongoDBService.ConnectCollection<CityListModal>(MongoDBService.COLLECTION_NAME.CityListModal);
+                CityListModal city = null;
+                try
+                {
+                    city = col_city.Find(Builders<CityListModal>.Filter.Eq("_id", new ObjectId(data.city_id))).FirstOrDefault();
+                    if (city == null)
+                    {
+                        throw new ErrorException("Choose valid city.");
+                    }
+                }
+                catch
+                {
+                    throw new ErrorException("Choose valid city.");
+                }
+
+                if (data.gmt < -12 || data.gmt > 14)
+                {
+                    throw new ErrorException("GMT must be between -12.00 to 14.00");
+                }
+
                 var update = Builders<GuestsModel>.Update
                     .Set(u => u.name, data.name)
                     .Set(u => u.city_id, data.city_id)
                     .Set(u => u.tob, data.tob)
                     .Set(u => u.dob, data.dob)
                     .Set("updated_date", DateTime.Now)
-                    .Set(u => u.updated_by, null);
+                    .Set(u => u.updated_by, null)
+                    .Set(u => u.gmt, data.gmt)
+                    .Set(u=>u.city,city);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
