@@ -126,7 +126,7 @@ namespace FutureTime.Helper
             {
                 if (dateOfBirth == null) dateOfBirth = DateTime.Now;
 
-                var requestUrl = $"{AppStatic.CONFIG.App.VedicAPI.URL}/dashas/current-mahadasha-full?dob={dateOfBirth.ToString("dd/MM/yyyy")}&tob={timeOfBirth}" +
+                var requestUrl = $"{AppStatic.CONFIG.App.VedicAPI.URL}/dashas/current-mahadasha-full?dob={((DateTime)dateOfBirth).ToString("dd/MM/yyyy")}&tob={timeOfBirth}" +
                                  $"&lat={latitude}&lon={longitude}&tz={timezone}&lang={language}&api_key={AppStatic.CONFIG.App.VedicAPI.apiKey}";
 
                 JsonDocument doc;
