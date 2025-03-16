@@ -121,7 +121,7 @@ namespace FutureTime.Controllers.Backend
                         guest.tob,
                         guest.city.lng,
                         guest.city.lat,
-                        guest.gmt.ToString(),
+                        guest.tz.ToString(),
                         "en"
                     );
 

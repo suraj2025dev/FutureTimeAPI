@@ -561,16 +561,6 @@ namespace FutureTime.Controllers.Backend
                                 );
                 var item = col.Find(filters).FirstOrDefault();
 
-                #region guest
-                var col_guest = MongoDBService.ConnectCollection<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel);
-
-                var filters_guest = Builders<GuestsModel>.Filter.And(
-                                    Builders<GuestsModel>.Filter.Eq("active", true),
-                                    Builders<GuestsModel>.Filter.Eq("_id", item.guest_id)
-                                );
-                var guest = (col_guest.Find(filters_guest).First());
-                #endregion
-
                 var vedic_api_response = item.vedic_api_response_list;
 
                 if(vedic_api_response == null)
@@ -583,10 +573,10 @@ namespace FutureTime.Controllers.Backend
                 {
                     var a= await VedicAPIConnection.APICall.GetPlanetDetail(
                             DateTime.Now,
-                            guest.tob,
-                            guest.city.lat,
-                            guest.city.lng,
-                            guest.gmt.ToString()
+                            item.profile1.tob,
+                            item.profile1.city.lat,
+                            item.profile1.city.lng,
+                            item.profile1.tz.ToString()
                         );
 
                     
@@ -601,17 +591,40 @@ namespace FutureTime.Controllers.Backend
                 }
                 else if (vedic_api_type_id == "2")
                 {
-                   //TODO
+                    var a = await VedicAPIConnection.APICall.GetPlanetDetail(
+                            DateTime.Parse(item.profile1.dob),
+                            item.profile1.tob,
+                            item.profile1.city.lat,
+                            item.profile1.city.lng,
+                            item.profile1.tz.ToString()
+                        );
+
+
+                    var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
+                    if (index > -1)
+                    {
+                        vedic_api_response[index] = new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        };
+                    }
                 }
                 else if (vedic_api_type_id == "3")
                 {
-                    var a = await VedicAPIConnection.APICall.GetPanchang(
-                           DateTime.Now,//TODO 
-                           guest.tob,
-                           guest.city.lat,
-                           guest.city.lng,
-                           guest.gmt.ToString()
-                       );
+                    var a = await VedicAPIConnection.APICall.MatchMaking(
+                             DateTime.Parse(item.profile1.dob),
+                             item.profile1.tob,
+                             item.profile1.city.lat,
+                             item.profile1.city.lng,
+                             item.profile1.tz.ToString(),
+
+                             DateTime.Parse(item.profile2.dob),
+                             item.profile2.tob,
+                             item.profile2.city.lat,
+                             item.profile2.city.lng,
+                             item.profile2.tz.ToString()
+                         );
 
 
                     var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
@@ -626,12 +639,33 @@ namespace FutureTime.Controllers.Backend
                 }
                 else if (vedic_api_type_id == "4")
                 {
+                    var a = await VedicAPIConnection.APICall.GetPanchang(
+                           (DateTime)item.inquiry_regular.auspicious_from_date,
+                           item.profile1.tob,
+                           item.profile1.city.lat,
+                           item.profile1.city.lng,
+                           item.profile1.tz.ToString()
+                       );
+
+
+                    var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
+                    if (index > -1)
+                    {
+                        vedic_api_response[index] = new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        };
+                    }
+                }
+                else if (vedic_api_type_id == "5")
+                {
                     var a = await VedicAPIConnection.APICall.GetMahadasha(
-                           DateTime.Now,//TODO 
-                           guest.tob,
-                           guest.city.lat,
-                           guest.city.lng,
-                           guest.gmt.ToString()
+                           DateTime.Now,
+                           item.profile1.tob,
+                           item.profile1.city.lat,
+                           item.profile1.city.lng,
+                           item.profile1.tz.ToString()
                        );
 
 

@@ -77,9 +77,9 @@ namespace FutureTime.Controllers.Backend
                 }
                 else
                 {
-                    if(data.gmt<-12 || data.gmt > 14)
+                    if(data.tz<-12 || data.tz > 14)
                     {
-                        throw new ErrorException("GMT must be between -12.00 to 14.00");
+                        throw new ErrorException("Timezone must be between -12.00 to 14.00");
                     }
 
                     var col_city = MongoDBService.ConnectCollection<CityListModal>(MongoDBService.COLLECTION_NAME.CityListModal);
@@ -157,7 +157,7 @@ namespace FutureTime.Controllers.Backend
                         token = null,
                         created_date = DateTime.Now,
                         updated_date = DateTime.Now,
-                        gmt = data.gmt,
+                        tz = data.tz,
                         city= city
                         //created_by = request.user_id,
                         //updated_by = request.user_id,
@@ -343,8 +343,27 @@ namespace FutureTime.Controllers.Backend
 
         [AnonymousAuthorizeFilter]
         [HttpGet]
-        [Route("SearchCountry")]
-        public IActionResult SearchCountry(string search_param)
+        [Route("GetGMTTZ")]
+        public IActionResult GetGMTTZ()
+        {
+            try
+            {
+                var gmt_tz = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.GMT_TZ).Select(s => s.list).First();
+                response.data.Add("gmt_tz", gmt_tz);
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
+        [AnonymousAuthorizeFilter]
+        [HttpGet]
+        [Route("SearchCity")]
+        public IActionResult SearchCity(string search_param)
         {
             try
             {
@@ -411,7 +430,7 @@ namespace FutureTime.Controllers.Backend
                     tob=item.tob,
                     city_id=item.city_id,
                     city=item.city,
-                    gmt=item.gmt,
+                    tz=item.tz,
                     guest_profile = item.guest_profile == null ? null 
                         : new {
                             basic_description=item.guest_profile.basic_description,
@@ -468,7 +487,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Choose valid city.");
                 }
 
-                if (data.gmt < -12 || data.gmt > 14)
+                if (data.tz < -12 || data.tz > 14)
                 {
                     throw new ErrorException("GMT must be between -12.00 to 14.00");
                 }
@@ -480,7 +499,7 @@ namespace FutureTime.Controllers.Backend
                     .Set(u => u.dob, data.dob)
                     .Set("updated_date", DateTime.Now)
                     .Set(u => u.updated_by, null)
-                    .Set(u => u.gmt, data.gmt)
+                    .Set(u => u.tz, data.tz)
                     .Set(u=>u.city,city);
 
                 var result = await col.UpdateOneAsync(filter, update);

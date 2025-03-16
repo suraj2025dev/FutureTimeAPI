@@ -88,10 +88,27 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide valid tob in HH:MM format from 00:00 to 23:59");
                 }
 
-                if (dto.profile1.city_id == "" || dto.profile1.city_id == null)
+                if (dto.profile1.tz < -12 || dto.profile1.tz > 14)
                 {
-                    throw new ErrorException("Profile 1 city is required.");
+                    throw new ErrorException("Timezone must be between -12.00 to 14.00");
                 }
+
+                var col_city = MongoDBService.ConnectCollection<CityListModal>(MongoDBService.COLLECTION_NAME.CityListModal);
+                CityListModal city_profile1 = null;
+                try
+                {
+                    city_profile1 = col_city.Find(Builders<CityListModal>.Filter.Eq("_id", new ObjectId(dto.profile1.city_id))).FirstOrDefault();
+                    if (city_profile1 == null)
+                    {
+                        throw new ErrorException("Choose valid city for profile 1.");
+                    }
+                }
+                catch
+                {
+                    throw new ErrorException("Choose valid city for profile 1.");
+                }
+
+                dto.profile1.city = city_profile1;
 
                 #endregion
 
@@ -176,10 +193,27 @@ namespace FutureTime.Controllers.Backend
                             throw new ErrorException("Please provide valid tob in HH:MM format from 00:00 to 23:59");
                         }
 
-                        if (dto.profile2.city_id == "" || dto.profile2.city_id == null)
+                        if (dto.profile2.tz < -12 || dto.profile2.tz > 14)
                         {
-                            throw new ErrorException("Profile 2 city is required.");
+                            throw new ErrorException("Timezone must be between -12.00 to 14.00");
                         }
+
+                        CityListModal city_profile2 = null;
+                        try
+                        {
+                            city_profile2 = col_city.Find(Builders<CityListModal>.Filter.Eq("_id", new ObjectId(dto.profile2.city_id))).FirstOrDefault();
+                            if (city_profile2 == null)
+                            {
+                                throw new ErrorException("Choose valid city for profile 1.");
+                            }
+                        }
+                        catch
+                        {
+                            throw new ErrorException("Choose valid city for profile 1.");
+                        }
+
+                        dto.profile2.city = city_profile2;
+                        new_inquiry.profile2.city = city_profile2;
 
                         #endregion
 

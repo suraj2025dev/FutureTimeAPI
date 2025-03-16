@@ -163,18 +163,71 @@
                     new StaticDataList
                     {
                         id = "2",
-                        name = "Matching North Match With Astro"
+                        name = "Horoscope Planet Detail (Birth)"
                     },
                     new StaticDataList
                     {
                         id = "3",
-                        name = "Panchang"
+                        name = "Matching North Match With Astro"
                     },
                     new StaticDataList
                     {
                         id = "4",
+                        name = "Panchang"
+                    },
+                    new StaticDataList
+                    {
+                        id = "5",
                         name = "Dasha Current Maha Dasha Full"
                     }
+                }
+            });
+            #endregion
+
+            #region GMT TZ
+            FTStaticData.data.Add(new StaticData
+            {
+                type = STATIC_DATA_TYPE.GMT_TZ,
+                list = new List<StaticDataList>
+                {
+                    new StaticDataList { id = "-12", name = "GMT-12:00" },
+                    new StaticDataList { id = "-11", name = "GMT-11:00" },
+                    new StaticDataList { id = "-10", name = "GMT-10:00" },
+                    new StaticDataList { id = "-9.5", name = "GMT-9:30" },
+                    new StaticDataList { id = "-9", name = "GMT-9:00" },
+                    new StaticDataList { id = "-8", name = "GMT-8:00" },
+                    new StaticDataList { id = "-7", name = "GMT-7:00" },
+                    new StaticDataList { id = "-6", name = "GMT-6:00" },
+                    new StaticDataList { id = "-5", name = "GMT-5:00" },
+                    new StaticDataList { id = "-4", name = "GMT-4:00" },
+                    new StaticDataList { id = "-3.5", name = "GMT-3:30" },
+                    new StaticDataList { id = "-3", name = "GMT-3:00" },
+                    new StaticDataList { id = "-2", name = "GMT-2:00" },
+                    new StaticDataList { id = "-1", name = "GMT-1:00" },
+                    new StaticDataList { id = "0", name = "GMT+0:00" },
+                    new StaticDataList { id = "1", name = "GMT+1:00" },
+                    new StaticDataList { id = "2", name = "GMT+2:00" },
+                    new StaticDataList { id = "3", name = "GMT+3:00" },
+                    new StaticDataList { id = "3.5", name = "GMT+3:30" },
+                    new StaticDataList { id = "4", name = "GMT+4:00" },
+                    new StaticDataList { id = "4.5", name = "GMT+4:30" },
+                    new StaticDataList { id = "5", name = "GMT+5:00" },
+                    new StaticDataList { id = "5.5", name = "GMT+5:30" },
+                    new StaticDataList { id = "5.75", name = "GMT+5:45" },
+                    new StaticDataList { id = "6", name = "GMT+6:00" },
+                    new StaticDataList { id = "6.5", name = "GMT+6:30" },
+                    new StaticDataList { id = "7", name = "GMT+7:00" },
+                    new StaticDataList { id = "8", name = "GMT+8:00" },
+                    new StaticDataList { id = "8.75", name = "GMT+8:45" },
+                    new StaticDataList { id = "9", name = "GMT+9:00" },
+                    new StaticDataList { id = "9.5", name = "GMT+9:30" },
+                    new StaticDataList { id = "10", name = "GMT+10:00" },
+                    new StaticDataList { id = "10.5", name = "GMT+10:30" },
+                    new StaticDataList { id = "11", name = "GMT+11:00" },
+                    new StaticDataList { id = "12", name = "GMT+12:00" },
+                    new StaticDataList { id = "12.75", name = "GMT+12:45" },
+                    new StaticDataList { id = "13", name = "GMT+13:00" },
+                    new StaticDataList { id = "14", name = "GMT+14:00" }
                 }
             });
             #endregion

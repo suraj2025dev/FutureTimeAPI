@@ -16,7 +16,8 @@
         RASHI,
         USER_TYPE,
         CATEGORY_TYPE,
-        VEDIC_API_TYPE
+        VEDIC_API_TYPE,
+        GMT_TZ
     }
 
     public class StaticData
