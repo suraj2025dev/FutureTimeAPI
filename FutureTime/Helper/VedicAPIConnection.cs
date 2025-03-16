@@ -60,7 +60,7 @@ namespace FutureTime.Helper
                 var requestUrl = "";
                 
                 requestUrl = $"{AppStatic.CONFIG.App.VedicAPI.URL}/matching/ashtakoot-with-astro-details?" +
-                                $"boy_dob={dateOfBirth.ToString("dd/MM/yyyy")}&boy_tob={timeOfBirth}&boy_lat={latitude}&boy_lon={longitude}&boy_tz={timezone}" +
+                                $"boy_dob={dateOfBirth.ToString("dd/MM/yyyy")}&boy_tob={timeOfBirth}&boy_lat={latitude}&boy_lon={longitude}&boy_tz={timezone}&" +
                                 $"girl_dob={dateOfBirth2.ToString("dd/MM/yyyy")}&girl_tob={timeOfBirth2}&girl_lat={latitude2}&girl_lon={longitude2}&girl_tz={timezone2}" +
                                 $"&lang={language}&api_key={AppStatic.CONFIG.App.VedicAPI.apiKey}";
 
@@ -117,14 +117,14 @@ namespace FutureTime.Helper
             }
 
             public static async Task<JsonElement> GetMahadasha(
-                     DateTime dateOfBirth,
+                     DateTime? dateOfBirth,
                     string timeOfBirth,
                     string latitude,
                     string longitude,
                     string timezone,
                     string language = "en")
             {
-
+                if (dateOfBirth == null) dateOfBirth = DateTime.Now;
 
                 var requestUrl = $"{AppStatic.CONFIG.App.VedicAPI.URL}/dashas/current-mahadasha-full?dob={dateOfBirth.ToString("dd/MM/yyyy")}&tob={timeOfBirth}" +
                                  $"&lat={latitude}&lon={longitude}&tz={timezone}&lang={language}&api_key={AppStatic.CONFIG.App.VedicAPI.apiKey}";

@@ -151,7 +151,8 @@ namespace FutureTime.Controllers.Backend
                                 s.created_date,
                                 //s.created_by,
                                 //s.updated_by,
-                                s.updated_date
+                                s.updated_date,
+                                s.vedic_api_response_list
                             }).ToList();
                 var totalCount = await col.CountDocumentsAsync(filters);
                 response.data.Add("list", items);
@@ -437,7 +438,8 @@ namespace FutureTime.Controllers.Backend
                                         //s.is_read,
                                         assignee = GetUsers(s.assignee_id) == null ? "" : GetUsers(s.assignee_id).name,//TODO
                                         s.comment_for_assignee,
-                                        s.final_reading
+                                        s.final_reading,
+                                        s.vedic_api_response_list
                                     }).OrderByDescending(o => o.purchased_on).ToList();
 
                 if(items.Count() == 0)
@@ -581,12 +583,21 @@ namespace FutureTime.Controllers.Backend
 
                     
                     var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
-                    if (index > -1) {
+                    if (index > -1)
+                    {
                         vedic_api_response[index] = new VedicAPIResponse
                         {
                             vedic_api_type_id = vedic_api_type_id,
                             vedic_api_response = a.ToString()
                         };
+                    }
+                    else
+                    {
+                        vedic_api_response.Add(new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        });
                     }
                 }
                 else if (vedic_api_type_id == "2")
@@ -608,6 +619,14 @@ namespace FutureTime.Controllers.Backend
                             vedic_api_type_id = vedic_api_type_id,
                             vedic_api_response = a.ToString()
                         };
+                    }
+                    else
+                    {
+                        vedic_api_response.Add(new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        });
                     }
                 }
                 else if (vedic_api_type_id == "3")
@@ -636,11 +655,19 @@ namespace FutureTime.Controllers.Backend
                             vedic_api_response = a.ToString()
                         };
                     }
+                    else
+                    {
+                        vedic_api_response.Add(new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        });
+                    }
                 }
                 else if (vedic_api_type_id == "4")
                 {
-                    var a = await VedicAPIConnection.APICall.GetPanchang(
-                           (DateTime)item.inquiry_regular.auspicious_from_date,
+                    var a = await VedicAPIConnection.APICall.GetPanchang(//Panchang for either horoscope from date or aus from date
+                           (DateTime)item.inquiry_regular.auspicious_from_date == null ? (DateTime)item.inquiry_regular.horoscope_from_date : (DateTime)item.inquiry_regular.auspicious_from_date,
                            item.profile1.tob,
                            item.profile1.city.lat,
                            item.profile1.city.lng,
@@ -657,11 +684,19 @@ namespace FutureTime.Controllers.Backend
                             vedic_api_response = a.ToString()
                         };
                     }
+                    else
+                    {
+                        vedic_api_response.Add(new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        });
+                    }
                 }
                 else if (vedic_api_type_id == "5")
                 {
                     var a = await VedicAPIConnection.APICall.GetMahadasha(
-                           DateTime.Now,
+                           (DateTime)item.inquiry_regular.auspicious_from_date == null ? (DateTime)item.inquiry_regular.horoscope_from_date : (DateTime)item.inquiry_regular.auspicious_from_date,
                            item.profile1.tob,
                            item.profile1.city.lat,
                            item.profile1.city.lng,
@@ -677,6 +712,14 @@ namespace FutureTime.Controllers.Backend
                             vedic_api_type_id = vedic_api_type_id,
                             vedic_api_response = a.ToString()
                         };
+                    }
+                    else
+                    {
+                        vedic_api_response.Add(new VedicAPIResponse
+                        {
+                            vedic_api_type_id = vedic_api_type_id,
+                            vedic_api_response = a.ToString()
+                        });
                     }
                 }
 
@@ -693,7 +736,7 @@ namespace FutureTime.Controllers.Backend
                 }
                 _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, inquiry_id, request.user_id);
 
-                response.message = "Comment Pushed.";
+                response.message = "Vedic API Fetched.";
 
             }
             catch (Exception ex)
