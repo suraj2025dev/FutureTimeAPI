@@ -691,7 +691,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, inquiry_id, request.user_id);
 
                 response.message = "Comment Pushed.";
 
