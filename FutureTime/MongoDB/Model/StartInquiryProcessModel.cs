@@ -32,7 +32,8 @@ namespace FutureTime.MongoDB.Model
         Translator = 2,
         Reviewer = 3,
         Published = 4,
-        Cancelled = 5
+        Cancelled = 5,
+        Rejected = 6
     }
 
     public class StartInquiryProcessModel : MasterModel

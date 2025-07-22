@@ -20,6 +20,8 @@ namespace Auth.MongoRef
         public string updated_by { get; set; }
         public DateTime created_date { get; set; }
         public string created_by { get; set; }
+        public string? forget_password_otp { get; set; }
+        public DateTime? forget_password_otp_valid_till { get; set; }
     }
 
 }

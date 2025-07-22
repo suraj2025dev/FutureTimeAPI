@@ -184,6 +184,8 @@ namespace FutureTime.Controllers.Backend
                 //var assigned_person = col.Find(filters).FirstOrDefault().ass;
 
                 var assignee = GetUsers(dto.assignee_id);
+                if (assignee == null)
+                    throw new ErrorException("Invalid assignee.");
                 var new_state = INQUIRY_STATE.New;
                 if (assignee.user_type_id == 3)
                 {
@@ -378,6 +380,54 @@ namespace FutureTime.Controllers.Backend
             return Ok(response);
 
         }
+
+        [HttpPost]
+        [Route("RejectInquiry")]
+
+        public async Task<IActionResult> RejectInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
+        {
+            try
+            {
+                var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
+
+                var filters = Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("active", true),
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("_id", dto.inquiry_id)
+                                );
+
+                var inq = col.Find(filters).FirstOrDefault();
+                if(inq.inquiry_state == INQUIRY_STATE.Published)
+                {
+                    throw new ErrorException("Sorry, published inquiry can not be rejected.");
+                }
+
+                var update = Builders<StartInquiryProcessModel>.Update
+                    .Set(i => i.inquiry_status, INQUIRY_STATUS.Pending)
+                    .Set(i => i.inquiry_state, INQUIRY_STATE.Rejected)
+                    .Set(i => i.updated_by, request.user_id)
+                    .Set(i => i.updated_date, DateTime.Now);  // Update updated_date field
+
+                var result = await col.UpdateOneAsync(filters, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    throw new ErrorException("Please provide valid id for update operation.");
+                }
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
+
+
+                response.message = "Rejected an inquiry.";
+
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            //response.message = "Daily Rashi Updates saved for the day.";
+            return Ok(response);
+
+        }
+
 
         [HttpGet]
         [Route("GetAssigneeList")]
