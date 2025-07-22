@@ -49,7 +49,7 @@ namespace FutureTime.Controllers.Backend
                 if (data.is_login)
                 {
                     //Check if email already exists.
-                    var filter = Builders<GuestsModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i"));
+                    var filter = Builders<GuestsModel>.Filter.Regex("email", Helper.Lib._BsonRegularExpression(data.email.ToLower(), "i"));
                     var guestData = col.Find(filter).ToList();
 
                     if (guestData != null && guestData.Count() > 0)
@@ -97,7 +97,7 @@ namespace FutureTime.Controllers.Backend
                         throw new ErrorException("Choose valid city.");
                     }
 
-                    var filter = Builders<GuestsModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i"));
+                    var filter = Builders<GuestsModel>.Filter.Regex("email", Helper.Lib._BsonRegularExpression(data.email.ToLower(), "i"));
                     var guestData = col.Find(filter).ToList();
 
                     if (guestData != null && guestData.Count() > 0)
@@ -376,10 +376,10 @@ namespace FutureTime.Controllers.Backend
 
                 search_param = search_param.ToLower();
                 var filter = Builders<CityListModal>.Filter.Or(
-                     Builders<CityListModal>.Filter.Regex("city_ascii", new BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("country", new BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("iso2", new BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("iso3", new BsonRegularExpression(search_param, "i"))
+                     Builders<CityListModal>.Filter.Regex("city_ascii", Helper.Lib._BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("country", Helper.Lib._BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso2", Helper.Lib._BsonRegularExpression(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso3", Helper.Lib._BsonRegularExpression(search_param, "i"))
                  );
                 var results = col.Find(filter).Limit(1000).ToList();
 

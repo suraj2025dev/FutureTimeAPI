@@ -56,7 +56,7 @@ namespace FutureTime.Controllers.Backend
                 data.updated_date = DateTime.Now;
 
                 //Check if question already exists.
-                var filter = Builders<BundleModel>.Filter.Regex("name", new BsonRegularExpression(data.name.ToLower(), "i"));
+                var filter = Builders<BundleModel>.Filter.Regex("name", Helper.Lib._BsonRegularExpression(data.name.ToLower(), "i"));
                 var exists = col.Find(filter).Any();
 
                 if (exists)
@@ -128,7 +128,7 @@ namespace FutureTime.Controllers.Backend
                 data = await ValidateData(data);
 
                 #region Check question Name Exists in other id
-                var c_filter = Builders<BundleModel>.Filter.Regex("name", new BsonRegularExpression(data.name.ToLower(), "i"));
+                var c_filter = Builders<BundleModel>.Filter.Regex("name", Helper.Lib._BsonRegularExpression(data.name.ToLower(), "i"));
                 var idFilter = Builders<BundleModel>.Filter.Ne("_id", data._id);
                 var combinedFilter = Builders<BundleModel>.Filter.And(c_filter, idFilter);
                 var exists = col.Find(combinedFilter).Any();

@@ -47,7 +47,7 @@ namespace FutureTime.Controllers.Backend
 
                 //Check if category already exists.
                 #region Check Category Name Exists in other id
-                var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", new BsonRegularExpression(data.category.ToLower(), "i"));
+                var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", Helper.Lib._BsonRegularExpression(data.category.ToLower(), "i"));
                 var ctFilter = Builders<QuestionCategoryModel>.Filter.Eq("category_type_id", data.category_type_id);
                 var combinedFilter = Builders<QuestionCategoryModel>.Filter.And(c_filter, ctFilter);
                 var exists = col.Find(combinedFilter).Any();
@@ -117,7 +117,7 @@ namespace FutureTime.Controllers.Backend
 
 
                 #region Check Category Name Exists in other id
-                var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", new BsonRegularExpression(data.category.ToLower(), "i"));
+                var c_filter = Builders<QuestionCategoryModel>.Filter.Regex("category", Helper.Lib._BsonRegularExpression(data.category.ToLower(), "i"));
                 var idFilter = Builders<QuestionCategoryModel>.Filter.Ne("_id", data._id);
                 var ctFilter = Builders<QuestionCategoryModel>.Filter.Ne("category_type_id", data.category_type_id);
                 var combinedFilter = Builders<QuestionCategoryModel>.Filter.And(c_filter, idFilter, ctFilter);

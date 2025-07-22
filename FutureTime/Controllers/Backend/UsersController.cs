@@ -45,7 +45,7 @@ namespace FutureTime.Controllers.Backend
                 data._id = null;
                 
                 //Check if email already exists.
-                var filter = Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i"));
+                var filter = Builders<UsersModel>.Filter.Regex("email", Helper.Lib._BsonRegularExpression(data.email.ToLower(), "i"));
                 var emailExists = col.Find(filter).Any();
 
                 if (emailExists)
@@ -141,7 +141,7 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 #region Check Email Exists in other id
-                var emailFilter = Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i"));
+                var emailFilter = Builders<UsersModel>.Filter.Regex("email", Helper.Lib._BsonRegularExpression(data.email.ToLower(), "i"));
                 var idFilter = Builders<UsersModel>.Filter.Ne("_id", data._id);
                 var combinedFilter = Builders<UsersModel>.Filter.And(emailFilter, idFilter);
                 var emailExists = col.Find(combinedFilter).Any();

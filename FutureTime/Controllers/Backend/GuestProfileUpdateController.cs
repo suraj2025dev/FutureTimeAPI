@@ -177,27 +177,27 @@ namespace FutureTime.Controllers.Backend
                 var filters = new List<FilterDefinition<GuestsModel>>();
                 if (!string.IsNullOrEmpty(data.name))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("name", new BsonRegularExpression(data.name.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("name", Helper.Lib._BsonRegularExpression(data.name.ToLower(), "i")));
                 }
                 if (!string.IsNullOrEmpty(data.email))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("email", new BsonRegularExpression(data.email.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("email", Helper.Lib._BsonRegularExpression(data.email.ToLower(), "i")));
                 }
                 if (!string.IsNullOrEmpty(data.city_id))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("city_id", new BsonRegularExpression(data.city_id.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("city_id", Helper.Lib._BsonRegularExpression(data.city_id.ToLower(), "i")));
                 }
                 if (!string.IsNullOrEmpty(data.dob))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("dob", new BsonRegularExpression(data.dob.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("dob", Helper.Lib._BsonRegularExpression(data.dob.ToLower(), "i")));
                 }
                 if (!string.IsNullOrEmpty(data.tob))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("tob", new BsonRegularExpression(data.tob.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("tob", Helper.Lib._BsonRegularExpression(data.tob.ToLower(), "i")));
                 }
                 if (!string.IsNullOrEmpty(data.name))
                 {
-                    filters.Add(Builders<GuestsModel>.Filter.Regex("name", new BsonRegularExpression(data.name.ToLower(), "i")));
+                    filters.Add(Builders<GuestsModel>.Filter.Regex("name", Helper.Lib._BsonRegularExpression(data.name.ToLower(), "i")));
                 }
                 if (data.is_profile_verified == true)
                 {

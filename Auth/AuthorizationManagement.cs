@@ -15,6 +15,7 @@ using System.Web.Helpers;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Auth.MongoRef;
+using System.Text.RegularExpressions;
 
 namespace Auth
 {
@@ -95,9 +96,9 @@ namespace Auth
         private static UsersModel? GetUser(string email)
         {
             var col = MongoDbRef.ConnectCollection<UsersModel>(MongoDbRef.COLLECTION_NAME.UsersModel);
-
+            string pattern = $"^{Regex.Escape(email)}$";
             var filter = Builders<UsersModel>.Filter.And(
-                            Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(email, "i")),
+                            Builders<UsersModel>.Filter.Regex("email", new BsonRegularExpression(pattern, "i")),
                             Builders<UsersModel>.Filter.Eq("active", true)
                         );
             var item = col.Find(filter).FirstOrDefaultAsync().Result;

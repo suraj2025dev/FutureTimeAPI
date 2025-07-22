@@ -16,6 +16,8 @@ namespace FutureTime.MongoDB.Model
         public string password { get; set; }
         public int user_type_id { get; set; }
         public bool active { get; set; }
+        public string? forget_password_otp { get; set; }
+        public DateTime? forget_password_otp_valid_till { get; set; }
     }
 
 }

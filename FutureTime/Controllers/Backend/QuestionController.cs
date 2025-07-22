@@ -73,11 +73,11 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 //Check if question already exists.
-                //var filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
+                //var filter = Builders<QuestionModel>.Filter.Regex("question", Helper.Lib._BsonRegularExpression(data.question.ToLower(), "i"));
 
                 var filter = Builders<QuestionModel>.Filter.And(
-                                Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i")),
-                                Builders<QuestionModel>.Filter.Regex("question_category_id", new BsonRegularExpression($"^{data.question_category_id}$", "i"))
+                                Builders<QuestionModel>.Filter.Regex("question", Helper.Lib._BsonRegularExpression(data.question.ToLower(), "i")),
+                                Builders<QuestionModel>.Filter.Regex("question_category_id", Helper.Lib._BsonRegularExpression($"^{data.question_category_id}$", "i"))
                             );
 
                 var exists = col.Find(filter).Any();
@@ -184,7 +184,7 @@ namespace FutureTime.Controllers.Backend
                 }
 
                 #region Check question Name Exists in other id
-                var c_filter = Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i"));
+                var c_filter = Builders<QuestionModel>.Filter.Regex("question", Helper.Lib._BsonRegularExpression(data.question.ToLower(), "i"));
                 var idFilter = Builders<QuestionModel>.Filter.Ne("_id", data._id);
                 var qcFilter = Builders<QuestionModel>.Filter.Eq("question_category_id", data.question_category_id);
                 var combinedFilter = Builders<QuestionModel>.Filter.And(c_filter, idFilter, qcFilter);
@@ -285,7 +285,7 @@ namespace FutureTime.Controllers.Backend
                 var filters = new List<FilterDefinition<QuestionModel>>();
                 if (!string.IsNullOrEmpty(data.question))
                 {
-                    filters.Add(Builders<QuestionModel>.Filter.Regex("question", new BsonRegularExpression(data.question.ToLower(), "i")));
+                    filters.Add(Builders<QuestionModel>.Filter.Regex("question", Helper.Lib._BsonRegularExpression(data.question.ToLower(), "i")));
                 }
                 if (data.question_category_id != null)
                 {
