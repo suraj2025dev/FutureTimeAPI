@@ -19,21 +19,7 @@ namespace Library.Data
         public void Save(){
             var data=new ActivityLogData();
 
-            string sql = "";
-
-            sql = @"
-INSERT INTO public.tbl_activity_log(
-	activity_detail, activity_user, reference_json,activity_date,remarks)
-	VALUES (@activity_detail, @activity_user,@reference_json,@activity_date,@remarks);
-";
-            Dao.Execute(sql, new
-            {
-                activity_detail = data.activity_detail,
-                activity_user = data.activity_user,
-                reference_json = new JsonbParameter(data.reference_json),
-                activity_date = (data.activity_date),
-                remarks = (data.remarks == null ? "" : data.remarks)
-            }, data.connection);
+           
 
         }
     }

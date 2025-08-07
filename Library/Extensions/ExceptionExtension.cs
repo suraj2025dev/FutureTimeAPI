@@ -99,27 +99,7 @@ namespace Library.Extensions
 
         private static void SaveApplicationException(this Exception ex, string guid)
         {
-            string sql = @"
-            INSERT INTO public.tbl_error_log(guid,exception)
-            VALUES(@guid,@exception::jsonb)
-";
-            try
-            {
-                var settings = new JsonSerializerSettings();
-                settings.Converters.Add(new IPAddressConverter());
-
-                
-                Dao.Execute(sql, new
-                {
-                    guid = guid.ToString(),
-                    exception = JsonConvert.SerializeObject(ex, settings)
-                });
-                
-            }
-            catch (Exception ex1)
-            {
-
-            }
+            
         }
 
         public static void WriteInLog(this Exception ex)

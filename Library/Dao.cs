@@ -10,7 +10,7 @@ using Library.Data;
 
 namespace Library
 {
-    public class Dao
+    public class Dao1
     {
 
         private static int GetConnectionTimeOut()

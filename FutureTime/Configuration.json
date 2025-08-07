@@ -8,7 +8,7 @@
     },
     "MongoDB": {
       "ConnectionURL": "mongodb://localhost:27017",
-      "DatabaseName": "FutureTime"
+      "DatabaseName": "FutureTime_1"
     },
     "Email": {
       "Host": "smtp.gmail.com",
