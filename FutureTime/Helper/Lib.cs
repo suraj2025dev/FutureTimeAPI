@@ -9,7 +9,7 @@ namespace FutureTime.Helper
     {
         public static BsonRegularExpression _BsonRegularExpression(string data, string options)
         {
-            string pattern = $"^{Regex.Escape(data)}$";
+            string pattern = Regex.Escape(data); // no ^ and $
             return new BsonRegularExpression(pattern, options);
         }
     }
