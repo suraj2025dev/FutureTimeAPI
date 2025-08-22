@@ -376,10 +376,10 @@ namespace FutureTime.Controllers.Backend
 
                 search_param = search_param.ToLower();
                 var filter = Builders<CityListModal>.Filter.Or(
-                     Builders<CityListModal>.Filter.Regex("city_ascii", Helper.Lib._BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("country", Helper.Lib._BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("iso2", Helper.Lib._BsonRegularExpression(search_param, "i")),
-                     Builders<CityListModal>.Filter.Regex("iso3", Helper.Lib._BsonRegularExpression(search_param, "i"))
+                     Builders<CityListModal>.Filter.Regex("city_ascii", Helper.Lib._BsonRegularExpression_WildCard(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("country", Helper.Lib._BsonRegularExpression_WildCard(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso2", Helper.Lib._BsonRegularExpression_WildCard(search_param, "i")),
+                     Builders<CityListModal>.Filter.Regex("iso3", Helper.Lib._BsonRegularExpression_WildCard(search_param, "i"))
                  );
                 var results = col.Find(filter).Limit(1000).ToList();
 
