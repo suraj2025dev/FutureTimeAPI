@@ -385,39 +385,31 @@ namespace FutureTime.Controllers.Backend
                 _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, new_inquiry._id, request.user_id);
 
                 #region StripePaymentGateway
-                var options = new SessionCreateOptions
-                {
-                    PaymentMethodTypes = new List<string> { "card" },
-                    LineItems = new List<SessionLineItemOptions>
-                    {
-                        new SessionLineItemOptions
-                        {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                Currency = "usd",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
-                                {
-                                    Name = "Horoscope Inquiry Purchase",
-                                    Description = "Horoscope Inquiry Purchase",
-                                },
-                                UnitAmount = long.Parse(new_inquiry.inquiry_regular.price.ToString()),
-                            },
-                            Quantity = 1,
-                        },
-                    },
-                    Mode = "payment",
-                    SuccessUrl = $"{AppStatic.CONFIG.App.Stripe.WebhookURL}/checkout/success/{AppStatic.CONFIG.App.Stripe.StripeWebHookToken}/{new_inquiry._id}",
-                    CancelUrl = $"{AppStatic.CONFIG.App.Stripe.WebhookURL}/checkout/cancel/{AppStatic.CONFIG.App.Stripe.StripeWebHookToken}/{new_inquiry._id}",
-                };
                 StripeConfiguration.ApiKey = AppStatic.CONFIG.App.Stripe.SecretKey;
-                var service = new SessionService();
-                var session = service.Create(options);
+
+                var options = new PaymentIntentCreateOptions
+                {
+                    Amount = long.Parse(new_inquiry.inquiry_regular.price.ToString())*100, // amount in cents
+                    Currency = "usd",
+                    PaymentMethodTypes = new List<string>
+                    {
+                        "card"
+                    },
+                                    Metadata = new Dictionary<string, string>
+                    {
+                        { "inquiry_id", new_inquiry._id.ToString() },
+                        { "inquiry_number", new_inquiry.inquiry_number }
+                    }
+                };
+
+                var service = new PaymentIntentService();
+                var paymentIntent = service.Create(options);
                 #endregion
 
                 //response.message = "Please complete the payment process.";
                 response.message = "Purchase Initiated. Please proceed for payment.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
-                response.data.Add("stripe_session_id", session.Id);
+                response.data.Add("client_secret", paymentIntent.ClientSecret);
 
             }
             catch (Exception ex)
