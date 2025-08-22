@@ -22,6 +22,8 @@ using System.Globalization;
 using FutureTime.MongoDB.Data;
 using DbUp;
 using System.Xml.Linq;
+using Stripe.Checkout;
+using Stripe;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -119,7 +121,7 @@ namespace FutureTime.Controllers.Backend
                     created_by=request.guest_id,
                     created_date= current_date,
                     guest_id=request.guest_id,
-                    inquiry_payment_status = INQUIRY_PAYMENT_STATUS.Paid,
+                    inquiry_payment_status = INQUIRY_PAYMENT_STATUS.Pending,
                     inquiry_status = INQUIRY_STATUS.Pending,
                     inquiry_state = INQUIRY_STATE.New,
                     inquiry_type = dto.inquiry_type,
@@ -382,9 +384,40 @@ namespace FutureTime.Controllers.Backend
 
                 _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, new_inquiry._id, request.user_id);
 
+                #region StripePaymentGateway
+                var options = new SessionCreateOptions
+                {
+                    PaymentMethodTypes = new List<string> { "card" },
+                    LineItems = new List<SessionLineItemOptions>
+                    {
+                        new SessionLineItemOptions
+                        {
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                Currency = "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = "Horoscope Inquiry Purchase",
+                                    Description = "Horoscope Inquiry Purchase",
+                                },
+                                UnitAmount = long.Parse(new_inquiry.inquiry_regular.price.ToString()),
+                            },
+                            Quantity = 1,
+                        },
+                    },
+                    Mode = "payment",
+                    SuccessUrl = $"{AppStatic.CONFIG.App.Stripe.WebhookURL}/checkout/success/{AppStatic.CONFIG.App.Stripe.StripeWebHookToken}/{new_inquiry._id}",
+                    CancelUrl = $"{AppStatic.CONFIG.App.Stripe.WebhookURL}/checkout/cancel/{AppStatic.CONFIG.App.Stripe.StripeWebHookToken}/{new_inquiry._id}",
+                };
+                StripeConfiguration.ApiKey = AppStatic.CONFIG.App.Stripe.SecretKey;
+                var service = new SessionService();
+                var session = service.Create(options);
+                #endregion
+
                 //response.message = "Please complete the payment process.";
-                response.message = "Purchase successfull.";
+                response.message = "Purchase Initiated. Please proceed for payment.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
+                response.data.Add("stripe_session_id", session.Id);
 
             }
             catch (Exception ex)

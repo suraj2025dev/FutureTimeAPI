@@ -1,26 +1,25 @@
 ﻿{
   "App": {
-    "Database": {
-      "HOST": "localhost",
-      "PORT": 5432,
-      "NAME": "future_time2",
-      "PASSWORD": "12345"
-    },
     "MongoDB": {
       "ConnectionURL": "mongodb://localhost:27017",
-      "DatabaseName": "FutureTime_1"
+      "DatabaseName": "FutureTime"
     },
     "Email": {
       "Host": "smtp.gmail.com",
       "Port": 587,
-      "Password": "qdwr xuax spkn iehk", 
-      "Mail": "sabinbadal98@gmail.com", 
+      "Password": "qdwr xuax spkn iehk",
+      "Mail": "sabinbadal98@gmail.com",
       "SecureSocketOptions": 3,
       "SenderName": "Future TIme"
     },
     "VedicAPI": {
       "URL": "https://api.vedicastroapi.com/v3-json",
       "apiKey": "33456ade-cb0b-535e-ba1d-f3716a106411"
+    },
+    "Stripe": {
+      "SecretKey": "",
+      "WebhookURL": "http://145.223.23.200:3004",
+      "StripeWebHookToken": "VnTsuSmSRpbdRL4KjL74dLuQmzdZKa"
     },
     "SessionTimeOut": 1000
   }

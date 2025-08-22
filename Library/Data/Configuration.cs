@@ -11,6 +11,7 @@
         public Email Email { get; set; }
         public int SessionTimeOut { get; set; }
         public VedicAPI VedicAPI { get; set; }
+        public Stripe Stripe { get; set; }
     }
     public class MongoDB
     {
@@ -39,6 +40,13 @@
     {
         public string URL { get; set; }
         public string apiKey { get; set; }
+    }
+
+    public class Stripe
+    {
+        public string SecretKey { get; set; }
+        public string WebhookURL { get; set; }
+        public string StripeWebHookToken { get; set; }
     }
 
 }

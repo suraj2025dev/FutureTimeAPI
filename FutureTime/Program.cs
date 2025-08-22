@@ -47,35 +47,6 @@ if (File.Exists(path))
 //var settings = builder.Configuration.GetSection("App:Database:HOST");//.Get<Configuration>();
 //AppStatic.CONFIG=settings; 
 
-var connectionString = "Server=" + AppStatic.CONFIG.App.Database.HOST + ";Port=" + AppStatic.CONFIG.App.Database.PORT + ";Database=" + AppStatic.CONFIG.App.Database.NAME + ";User Id=postgres;Password=" + AppStatic.CONFIG.App.Database.PASSWORD + ";Timeout=1024;";
-AppStatic.DB_CONN = "Server=" + AppStatic.CONFIG.App.Database.HOST + ";Port=" + AppStatic.CONFIG.App.Database.PORT + ";Database=" + AppStatic.CONFIG.App.Database.NAME + ";User Id=postgres;Password=" + AppStatic.CONFIG.App.Database.PASSWORD;
-if (false)
-{
-    try
-    {
-        using (NpgsqlConnection conn = new NpgsqlConnection(connectionString))
-        {
-            conn.Open();
-            // Define a query
-            using (NpgsqlCommand command = new NpgsqlCommand(@"
-SELECT pg_terminate_backend(pg_stat_activity.pid)
-FROM pg_stat_activity
-WHERE pg_stat_activity.datname = '" + AppStatic.CONFIG.App.Database.NAME + @"' -- ? change this to your DB
- AND pid <> pg_backend_pid();
-", conn))
-            {
-                NpgsqlDataReader dr = command.ExecuteReader();
-
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-
-    }
-}
-
-
 //try
 //{
 //    using (NpgsqlConnection conn = new NpgsqlConnection(connectionString))
@@ -95,27 +66,6 @@ WHERE pg_stat_activity.datname = '" + AppStatic.CONFIG.App.Database.NAME + @"' -
 //{
 
 //}
-
-EnsureDatabase.For.PostgresqlDatabase(connectionString);
-
-var upgrader =
-    DeployChanges.To
-        .PostgresqlDatabase(connectionString)
-        .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
-        .WithVariablesDisabled()
-        .WithExecutionTimeout(TimeSpan.FromSeconds(1800))
-        .LogToConsole()
-        .Build();
-
-var result = upgrader.PerformUpgrade();
-
-
-if (!result.Successful)
-{
-    Console.WriteLine("Error in migration");
-    return;
-}
-
 #endregion
 
 
