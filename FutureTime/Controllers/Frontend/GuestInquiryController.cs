@@ -409,6 +409,7 @@ namespace FutureTime.Controllers.Backend
                 //response.message = "Please complete the payment process.";
                 response.message = "Purchase Initiated. Please proceed for payment.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
+                response.data.Add("inquiry_id", new_inquiry._id.ToString());
                 response.data.Add("client_secret", paymentIntent.ClientSecret);
 
             }
