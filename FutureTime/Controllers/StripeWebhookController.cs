@@ -13,9 +13,17 @@ namespace FutureTime.Controllers
     [ApiController]
     public class StripeWebhookController : ControllerBase
     {
+        private readonly ILogger<StripeWebhookController> _logger;
+
+        public StripeWebhookController(ILogger<StripeWebhookController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpPost("callback")]
         public async Task<IActionResult> Webhook()
         {
+            _logger.LogInformation("Stripe Webhook called.");
             ApplicationResponse response = new ApplicationResponse();
 
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
