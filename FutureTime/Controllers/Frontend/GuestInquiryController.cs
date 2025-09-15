@@ -1,28 +1,14 @@
-﻿
-
-using FutureTime.Filters;
-using Auth;
-using Library;
+﻿using Auth;
 using Library.Data;
 using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
 using MongoDB.Driver;
-using static Dapper.SqlMapper;
 using FutureTime.MongoDB.Model;
 using FutureTime.MongoDB;
 using Library.Extensions;
 using Library.Exceptions;
-using FutureTime.StaticData;
 using MongoDB.Bson;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic;
-using System.Globalization;
 using FutureTime.MongoDB.Data;
-using DbUp;
-using System.Xml.Linq;
-using Stripe.Checkout;
 using Stripe;
 
 namespace FutureTime.Controllers.Backend
@@ -41,9 +27,6 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-       
-        
-
         [GuestAuthFilter]
         [HttpPost]
         [Route("StartInquiryProcess")]
@@ -59,7 +42,7 @@ namespace FutureTime.Controllers.Backend
             {
 
                 # region Validate Profile1
-                if(dto.profile1 == null)
+                if (dto.profile1 == null)
                 {
                     throw new ErrorException("Profile 1 data is required.");
                 }
@@ -116,34 +99,35 @@ namespace FutureTime.Controllers.Backend
 
                 var current_date = DateTime.Now;
                 //Validation & Data Filling
-                var new_inquiry = new StartInquiryProcessModel { 
-                    assignee_id=null,
-                    created_by=request.guest_id,
-                    created_date= current_date,
-                    guest_id=request.guest_id,
+                var new_inquiry = new StartInquiryProcessModel
+                {
+                    assignee_id = null,
+                    created_by = request.guest_id,
+                    created_date = current_date,
+                    guest_id = request.guest_id,
                     inquiry_payment_status = INQUIRY_PAYMENT_STATUS.Pending,
                     inquiry_status = INQUIRY_STATUS.Pending,
                     inquiry_state = INQUIRY_STATE.New,
                     inquiry_type = dto.inquiry_type,
                     inquiry_bundle = null,
                     inquiry_regular = null,
-                    inquiry_number =  Guid.NewGuid().ToString().Replace("-",""),
+                    inquiry_number = Guid.NewGuid().ToString().Replace("-", ""),
                     is_read = false,
-                    profile1=dto.profile1,
-                    profile2=dto.profile2,
-                    active=true,
-                    updated_by=request.guest_id,
-                    updated_date= current_date
+                    profile1 = dto.profile1,
+                    profile2 = dto.profile2,
+                    active = true,
+                    updated_by = request.guest_id,
+                    updated_date = current_date
                 };
 
-                if(new_inquiry.inquiry_type == INQUIRY_TYPE.Regular)
+                if (new_inquiry.inquiry_type == INQUIRY_TYPE.Regular)
                 {
                     var qsn_detail = MongoDBService.ConnectCollection<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel)
                                     .Find(Builders<QuestionModel>.Filter.And(
                                                 Builders<QuestionModel>.Filter.Eq("_id", dto.inquiry_regular.question_id),
                                                 Builders<QuestionModel>.Filter.Eq("active", true)
                                             )).FirstOrDefault();
-                    
+
                     if (qsn_detail == null)
                     {
                         throw new ErrorException("Question choosen in invalid");
@@ -152,15 +136,15 @@ namespace FutureTime.Controllers.Backend
                     var qsn_cat_detail = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel)
                                     .Find(Builders<QuestionCategoryModel>.Filter.And(
                                                 Builders<QuestionCategoryModel>.Filter.Eq("_id", qsn_detail.question_category_id)
-                                                //Builders<QuestionCategoryModel>.Filter.Eq("active", true)
+                                            //Builders<QuestionCategoryModel>.Filter.Eq("active", true)
                                             )).FirstOrDefault();
 
-                    if(qsn_cat_detail == null)
+                    if (qsn_cat_detail == null)
                     {
                         throw new ErrorException("Question Category in invalid");
                     }
 
-                    if(qsn_cat_detail.category_type_id == 2)
+                    if (qsn_cat_detail.category_type_id == 2)
                     {
                         //Compatibility Verification
                         #region Validate Profile2
@@ -225,11 +209,11 @@ namespace FutureTime.Controllers.Backend
                     DateTime auspicious_from_date1 = DateTime.MinValue;
                     if (qsn_cat_detail.category_type_id == 3)
                     {
-                        if(dto.auspicious_from_date == "" || dto.auspicious_from_date == null)
+                        if (dto.auspicious_from_date == "" || dto.auspicious_from_date == null)
                         {
                             throw new ErrorException("Please provide auspicious time prediction start date (auspicious_from_date).");
                         }
-                        
+
                         if (!DateTime.TryParse(dto.auspicious_from_date, out auspicious_from_date1))
                         {
                             throw new ErrorException("Please provide valid auspicious_from_date in format like 2024-01-01");
@@ -252,14 +236,15 @@ namespace FutureTime.Controllers.Backend
                     }
 
 
-                    new_inquiry.inquiry_regular = new InquiryRegular { 
+                    new_inquiry.inquiry_regular = new InquiryRegular
+                    {
                         question_id = dto.inquiry_regular.question_id,
-                        price=qsn_detail.price,
-                        question=qsn_detail.question,
+                        price = qsn_detail.price,
+                        question = qsn_detail.question,
                         reading_activity = new List<InquiryReading> { },
                         auspicious_from_date = qsn_cat_detail.category_type_id == 3 ? auspicious_from_date1 : null,
                         horoscope_from_date = qsn_cat_detail.category_type_id == 1 ? horoscope_from_date1 : null,
-                        category_type_id =qsn_cat_detail.category_type_id
+                        category_type_id = qsn_cat_detail.category_type_id
                     };
                 }
                 else
@@ -287,7 +272,7 @@ namespace FutureTime.Controllers.Backend
 
                     all_qsn_id = dto.inquiry_bundle.horoscope_question.Select(s => s.question_id).ToList();
                     all_qsn_id.AddRange(dto.inquiry_bundle.compatibility_question.Select(s => s.question_id).ToList());
-                    if(bundle_data.auspicious_question_id!=null)
+                    if (bundle_data.auspicious_question_id != null)
                         all_qsn_id.Add(bundle_data.auspicious_question_id);
 
                     var qsn_list_detail = MongoDBService.ConnectCollection<QuestionModel>(MongoDBService.COLLECTION_NAME.QuestionModel)
@@ -312,7 +297,8 @@ namespace FutureTime.Controllers.Backend
                     });
 
                     var horoscope_question = new List<InquiryRegular>();
-                    dto.inquiry_bundle.horoscope_question.ForEach(f => {
+                    dto.inquiry_bundle.horoscope_question.ForEach(f =>
+                    {
                         var qsn = qsn_list_detail.Where(w => w._id == f.question_id).FirstOrDefault();
                         if (qsn == null)
                         {
@@ -328,7 +314,8 @@ namespace FutureTime.Controllers.Backend
                     });
 
                     var compatibility_question = new List<InquiryRegular>();
-                    dto.inquiry_bundle.compatibility_question.ForEach(f => {
+                    dto.inquiry_bundle.compatibility_question.ForEach(f =>
+                    {
                         var qsn = qsn_list_detail.Where(w => w._id == f.question_id).FirstOrDefault();
                         if (qsn == null)
                         {
@@ -345,17 +332,17 @@ namespace FutureTime.Controllers.Backend
 
                     new_inquiry.inquiry_bundle = new InquiryBundle
                     {
-                      auspicious_question = auspicious_question,
-                      compatibility_question=  compatibility_question,
-                      horoscope_question= horoscope_question,
-                      bundle_id=dto.inquiry_bundle.bundle_id,
-                      bundle_name=bundle_data.name,
-                      description=bundle_data.description,
-                      price=bundle_data.price
+                        auspicious_question = auspicious_question,
+                        compatibility_question = compatibility_question,
+                        horoscope_question = horoscope_question,
+                        bundle_id = dto.inquiry_bundle.bundle_id,
+                        bundle_name = bundle_data.name,
+                        description = bundle_data.description,
+                        price = bundle_data.price
                     };
 
                     //Validation
-                    if(DateTime.Now.Date >= bundle_data.effective_from.Date && DateTime.Now.Date <= bundle_data.effective_to)
+                    if (DateTime.Now.Date >= bundle_data.effective_from.Date && DateTime.Now.Date <= bundle_data.effective_to)
                     {
 
                     }
@@ -364,9 +351,9 @@ namespace FutureTime.Controllers.Backend
                         throw new ErrorException("This bundle is expired.");
                     }
 
-                    if(bundle_data.horoscope_question_count != new_inquiry.inquiry_bundle.horoscope_question.Count)
+                    if (bundle_data.horoscope_question_count != new_inquiry.inquiry_bundle.horoscope_question.Count)
                     {
-                        throw new ErrorException("Total question in horoscope must be "+bundle_data.horoscope_question_count);
+                        throw new ErrorException("Total question in horoscope must be " + bundle_data.horoscope_question_count);
                     }
 
                     if (bundle_data.compatibility_question_count != new_inquiry.inquiry_bundle.compatibility_question.Count)
@@ -389,13 +376,13 @@ namespace FutureTime.Controllers.Backend
 
                 var options = new PaymentIntentCreateOptions
                 {
-                    Amount = long.Parse(new_inquiry.inquiry_regular.price.ToString())*100, // amount in cents
+                    Amount = long.Parse(new_inquiry.inquiry_regular.price.ToString()) * 100, // amount in cents
                     Currency = "usd",
                     PaymentMethodTypes = new List<string>
                     {
                         "card"
                     },
-                                    Metadata = new Dictionary<string, string>
+                    Metadata = new Dictionary<string, string>
                     {
                         { "inquiry_id", new_inquiry._id.ToString() },
                         { "inquiry_number", new_inquiry.inquiry_number }
@@ -406,7 +393,6 @@ namespace FutureTime.Controllers.Backend
                 var paymentIntent = service.Create(options);
                 #endregion
 
-                //response.message = "Please complete the payment process.";
                 response.message = "Purchase Initiated. Please proceed for payment.";
                 response.data.Add("inquiry_number", new_inquiry.inquiry_number);
                 response.data.Add("inquiry_id", new_inquiry._id.ToString());
@@ -424,9 +410,9 @@ namespace FutureTime.Controllers.Backend
         [GuestAuthFilter]
         [HttpGet]
         [Route("MyInquiries")]
-        public async Task<IActionResult> MyInquiries(string subsribed_on_from=null, 
-                                                        string subsribed_on_to=null, 
-                                                        string inquiry_number = null, 
+        public async Task<IActionResult> MyInquiries(string subsribed_on_from = null,
+                                                        string subsribed_on_to = null,
+                                                        string inquiry_number = null,
                                                         decimal? price_from = null,
                                                         decimal? price_to = null
                                                     )
@@ -439,7 +425,7 @@ namespace FutureTime.Controllers.Backend
             }
             try
             {
-                if (subsribed_on_from!=null && !DateTime.TryParse(subsribed_on_from, out DateTime _subsribed_on_from))
+                if (subsribed_on_from != null && !DateTime.TryParse(subsribed_on_from, out DateTime _subsribed_on_from))
                 {
                     throw new ErrorException("Please provide valid subsribed_on_from in format like 2024-01-01");
                 }
@@ -495,25 +481,25 @@ namespace FutureTime.Controllers.Backend
 
                 var inquiries = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel)
                                     .Find(filters).ToList()
-                                    .Select(s=>new 
+                                    .Select(s => new
                                     {
                                         inquiry_id = s._id,
                                         s.inquiry_regular.question,
                                         s.inquiry_regular.price,
                                         s.inquiry_number,
-                                        payment_successfull = s.inquiry_payment_status==INQUIRY_PAYMENT_STATUS.Paid?true:false,
+                                        payment_successfull = s.inquiry_payment_status == INQUIRY_PAYMENT_STATUS.Paid ? true : false,
                                         purchased_on = s.created_date,
                                         s.profile1,
                                         s.profile2,
                                         s.inquiry_regular.auspicious_from_date,
                                         s.inquiry_regular.horoscope_from_date,
                                         s.inquiry_regular.category_type_id,
-                                        is_replied = s.inquiry_state == INQUIRY_STATE.Published?true:false,  
+                                        is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
                                         s.is_read,
                                         s.final_reading,
                                         final_reading_on = (DateTime?)(s.inquiry_state == INQUIRY_STATE.Published ? s.updated_date : null),
                                         s.rating
-                                    }).OrderByDescending(o=>o.purchased_on).ToList();
+                                    }).OrderByDescending(o => o.purchased_on).ToList();
 
                 response.data.Add("inquiries", inquiries);
             }
@@ -581,7 +567,7 @@ namespace FutureTime.Controllers.Backend
                 return StatusCode(401, response);
             }
 
-            if(rating>=1 && rating <= 5)
+            if (rating >= 1 && rating <= 5)
             {
 
             }
@@ -662,6 +648,5 @@ namespace FutureTime.Controllers.Backend
             return Ok(response);
 
         }
-
     }
 }

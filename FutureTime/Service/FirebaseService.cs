@@ -1,15 +1,12 @@
 ﻿namespace FutureTime.Service
 {
-    using Amazon.Runtime.Internal;
     using FirebaseAdmin;
     using FirebaseAdmin.Messaging;
-    using FutureTime.MongoDB.Model;
     using FutureTime.MongoDB;
+    using FutureTime.MongoDB.Model;
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
     using Google.Apis.Auth.OAuth2;
-    using Microsoft.Extensions.Options;
-    using Org.BouncyCastle.Asn1.Ocsp;
     using System.Threading.Tasks;
 
     public class FirebaseService

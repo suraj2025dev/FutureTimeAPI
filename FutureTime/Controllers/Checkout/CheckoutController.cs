@@ -1,29 +1,11 @@
-﻿
-
-using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
-using FutureTime.MongoDB.Model;
+﻿using Auth;
 using FutureTime.MongoDB;
-using Library.Extensions;
+using FutureTime.MongoDB.Model;
+using Library.Data;
 using Library.Exceptions;
-using FutureTime.StaticData;
-using MongoDB.Bson;
-using System.Text.RegularExpressions;
-using Microsoft.VisualBasic;
-using System.Globalization;
-using FutureTime.MongoDB.Data;
-using DbUp;
-using System.Xml.Linq;
-using Stripe.Checkout;
-using Stripe;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 namespace FutureTime.Controllers.Backend
 {

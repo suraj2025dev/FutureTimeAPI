@@ -1,18 +1,12 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
+﻿using Auth;
+using FutureTime.MongoDB;
+using FutureTime.MongoDB.Model;
 using Library.Data;
+using Library.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using User;
 using User.Data;
-using static System.Net.WebRequestMethods;
-using FutureTime.MongoDB;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using FutureTime.MongoDB.Model;
-using Library.Exceptions;
-using Microsoft.VisualBasic;
-using System.Text.RegularExpressions;
 
 namespace FutureTime.Controllers.User
 {

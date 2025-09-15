@@ -1,7 +1,6 @@
 ﻿
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
-using System.Text.Json.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace FutureTime.MongoDB.Model
 {

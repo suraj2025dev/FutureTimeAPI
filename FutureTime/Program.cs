@@ -2,21 +2,12 @@
 using AegisService.Lib.Filters;
 using FutureTime;
 using FutureTime.Filters;
-using Auth;
-using DbUp;
+using FutureTime.StaticData;
 using Library.Data;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Npgsql;
 using System.Diagnostics;
 using System.Reflection;
-using System.Xml.Linq;
-using static Org.BouncyCastle.Math.EC.ECCurve;
-using FutureTime.MongoDB;
-using Microsoft.Extensions.Options;
-using FutureTime.StaticData;
-using FutureTime.Service;
 
 var isService = false;
 
@@ -27,7 +18,7 @@ if (Debugger.IsAttached == false && args.Contains("--service"))
 }
 if (isService)
 {
-    System.IO.Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+    System.IO.Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 }
 
 var builder = WebApplication.CreateBuilder(args);

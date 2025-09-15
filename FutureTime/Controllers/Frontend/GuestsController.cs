@@ -1,21 +1,14 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
-using FutureTime.MongoDB.Model;
+﻿using Auth;
 using FutureTime.MongoDB;
-using Library.Extensions;
-using Library.Exceptions;
+using FutureTime.MongoDB.Model;
 using FutureTime.StaticData;
+using Library.Data;
+using Library.Exceptions;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using MongoDB.Driver;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic;
 
 namespace FutureTime.Controllers.Backend
 {
