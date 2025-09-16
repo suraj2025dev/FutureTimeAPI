@@ -3,12 +3,14 @@ using FutureTime.MongoDB.Model;
 using FutureTime.Service;
 using Library.Data;
 using Library.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Stripe;
 
 namespace FutureTime.Controllers
 {
+
     [Route("[controller]")]
     [ApiController]
     public class StripeWebhookController : ControllerBase
@@ -20,6 +22,7 @@ namespace FutureTime.Controllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         [HttpPost("callback")]
         public async Task<IActionResult> Webhook()
         {
