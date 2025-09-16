@@ -27,6 +27,7 @@ namespace FutureTime.Controllers.Backend
         [HttpGet("success/{auth}/{inquiry_id}")]
         public async Task<IActionResult> success(string auth, string inquiry_id)
         {
+            Console.WriteLine("Checkout success called.");
             if (AppStatic.CONFIG.App.Stripe.StripeWebHookToken != auth)
             {
                 return StatusCode(401);
@@ -67,6 +68,7 @@ namespace FutureTime.Controllers.Backend
         [HttpGet("cancel/{auth}/{inquiry_id}")]
         public async Task<IActionResult> cancel(string auth, string inquiry_id)
         {
+            Console.WriteLine("Checkout cancel called");
             if (AppStatic.CONFIG.App.Stripe.StripeWebHookToken != auth)
             {
                 return StatusCode(401);
