@@ -26,6 +26,7 @@ namespace FutureTime.Controllers
         [HttpPost("callback")]
         public async Task<IActionResult> Webhook()
         {
+            Console.WriteLine("Stripe Webhook called.");
             _logger.LogInformation("Stripe Webhook called.");
             ApplicationResponse response = new ApplicationResponse();
 
@@ -39,6 +40,7 @@ namespace FutureTime.Controllers
 
                 if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
                 {
+                    Console.WriteLine("Stripe payment successful"); ;
                     var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                     // Handle the successful payment here
 
@@ -83,6 +85,7 @@ namespace FutureTime.Controllers
                 }
                 else if(stripeEvent.Type == EventTypes.PaymentIntentPaymentFailed)
                 {
+                    Console.WriteLine("Stripe payment failed");
                     var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
                     // Handle the successful payment here
                     var inquiry_id = paymentIntent.Metadata["inquiry_id"];
