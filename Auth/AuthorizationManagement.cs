@@ -17,14 +17,6 @@ namespace Auth
             var controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
             if (controllerActionDescriptor != null)
             {
-                var endpoint = context.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IEndpointFeature>()?.Endpoint; // Updated to use IEndpointFeature
-                var hasAllowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
-
-                if (hasAllowAnonymous)
-                {
-                    return null; // Fixed return statement
-                }
-
                 var actionAttributes = controllerActionDescriptor.MethodInfo.GetCustomAttributes(inherit: true);
                 if (actionAttributes.Any(a => a is AllowAnonymousAttribute)) return null;
                 if (actionAttributes.Any(a => a is GuestAuthFilter))
@@ -32,6 +24,13 @@ namespace Auth
                     string token = context.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
                     context.HttpContext.Items["guest_token"] = token;
                     return null;
+                }
+                var endpoint = context.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IEndpointFeature>()?.Endpoint; // Updated to use IEndpointFeature
+                var hasAllowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
+
+                if (hasAllowAnonymous)
+                {
+                    return null; // Fixed return statement
                 }
             }
 
