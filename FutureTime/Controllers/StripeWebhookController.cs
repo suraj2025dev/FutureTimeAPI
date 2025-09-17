@@ -3,7 +3,6 @@ using FutureTime.MongoDB.Model;
 using FutureTime.Service;
 using Library.Data;
 using Library.Exceptions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using Stripe;
@@ -15,28 +14,28 @@ namespace FutureTime.Controllers
     [ApiController]
     public class StripeWebhookController : ControllerBase
     {
+        private readonly string _webhookSecret;
         private readonly ILogger<StripeWebhookController> _logger;
 
-        public StripeWebhookController(ILogger<StripeWebhookController> logger)
+        public StripeWebhookController(IConfiguration configuration, ILogger<StripeWebhookController> logger)
         {
+            _webhookSecret = configuration["Stripe:WebhookSecret"];
             _logger = logger;
         }
 
-        [AllowAnonymous]
-        [HttpPost("callback")]
-        public async Task<IActionResult> Webhook()
+        [Route("callback")]
+        [HttpPost]
+        public async Task<IActionResult> HandleWebhook()
         {
             Console.WriteLine("Stripe Webhook called.");
-            _logger.LogInformation("Stripe Webhook called.");
             ApplicationResponse response = new ApplicationResponse();
 
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-            string endpointSecret = AppStatic.CONFIG.App.Stripe.StripeWebHookToken;
             try
             {
                 var stripeEvent = EventUtility.ParseEvent(json);
                 var signatureHeader = Request.Headers["Stripe-Signature"];
-                stripeEvent = EventUtility.ConstructEvent(json, signatureHeader, endpointSecret);
+                stripeEvent = EventUtility.ConstructEvent(json, signatureHeader, _webhookSecret);
 
                 if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
                 {
