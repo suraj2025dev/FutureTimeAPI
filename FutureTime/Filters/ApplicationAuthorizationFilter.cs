@@ -1,7 +1,6 @@
+using Library.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Library.Data;
-using Microsoft.AspNetCore.Authorization;
 
 namespace FutureTime.Filters
 {

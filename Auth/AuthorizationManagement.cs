@@ -18,7 +18,7 @@ namespace Auth
             if (controllerActionDescriptor != null)
             {
                 var actionAttributes = controllerActionDescriptor.MethodInfo.GetCustomAttributes(inherit: true);
-                if (actionAttributes.Any(a => a is AllowAnonymousAttribute)) return null;
+                if (actionAttributes.Any(a => a is AnonymousAuthorizeFilter)) return null;
                 if (actionAttributes.Any(a => a is GuestAuthFilter))
                 {
                     string token = context.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

@@ -1,9 +1,9 @@
-using System;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Auth
 {
-    public class AnonymousAuthorizeFilter : Attribute
+    public class AnonymousAuthorizeFilter : Attribute, IAllowAnonymous
     {
     }
 }
