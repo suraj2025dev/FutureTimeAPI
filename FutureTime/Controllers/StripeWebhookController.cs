@@ -11,7 +11,7 @@ using Stripe;
 namespace FutureTime.Controllers
 {
     [AllowAnonymous]
-    [Route("[controller]")]
+    [Route("StripeWebhook")]
     [ApiController]
     public class StripeWebhookController : ControllerBase
     {

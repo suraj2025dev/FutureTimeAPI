@@ -1,20 +1,10 @@
-﻿using Library.Data;
+﻿using Auth.MongoRef;
+using Library.Data;
 using Library.Extensions;
-using Library;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Mvc;
-using Library.Exceptions;
-using static System.Net.WebRequestMethods;
-using System.Web.Helpers;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Auth.MongoRef;
 using System.Text.RegularExpressions;
 
 namespace Auth
@@ -28,7 +18,7 @@ namespace Auth
             if (controllerActionDescriptor != null)
             {
                 var actionAttributes = controllerActionDescriptor.MethodInfo.GetCustomAttributes(inherit: true);
-                if (actionAttributes.Any(a => a is AnonymousAuthorizeFilter)) return null;
+                if (actionAttributes.Any(a => a is AllowAnonymousAttribute)) return null;
                 if (actionAttributes.Any(a => a is GuestAuthFilter))
                 {
                     string token = context.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -37,22 +27,15 @@ namespace Auth
                 }
             }
 
-
-
-
             //USER BASED AUTH
             var dependencyScope = context.HttpContext.RequestServices;
             //var userRepo = dependencyScope.GetService(typeof(IUserRepo)) as User.;
-
             var active_session = new SessionPayload();
 
             try
             {
                 string token = context.HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                Guid as_unique_identifier = Guid.Empty;//Empty by default
-
-                //var handler = new JwtSecurityTokenHandler();
-
+                Guid as_unique_identifier = Guid.Empty;
                 {
                     active_session = SessionManagement.IsSessionActive(token);
                     if (active_session == null)
@@ -61,14 +44,12 @@ namespace Auth
                     }
                 }
 
-
                 context.HttpContext.Items["user_email"] = active_session.user_email;
                 context.HttpContext.Items["user_id"] = active_session.user_id;
                 context.HttpContext.Items["user_type_id"] = active_session.user_type_id;
 
                 //User from mongo
                 var user = GetUser(active_session.user_email);
-                
 
                 //If user is blocked/locked/inactivate. His session is terminated here.
                 if (user == null)
@@ -76,7 +57,6 @@ namespace Auth
                     SessionManagement.ClearUpSpecificSessionOfUser(active_session.user_email);
                     throw new Exception("Session Terminated");
                 }
-
             }
             catch (Exception ex)
             {
