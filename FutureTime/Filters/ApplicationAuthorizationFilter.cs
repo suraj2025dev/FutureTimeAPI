@@ -16,13 +16,13 @@ namespace FutureTime.Filters
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var endpoint = context.HttpContext.GetEndpoint();
-            var hasAllowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
+            //var endpoint = context.HttpContext.GetEndpoint();
+            //var hasAllowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
 
-            if(hasAllowAnonymous)
-            {
-                return;
-            }
+            //if(hasAllowAnonymous)
+            //{
+            //    return;
+            //}
 
             ApplicationResponse? response;
 

@@ -13,10 +13,18 @@ namespace Auth
     {
         public static ApplicationResponse ManageAuth(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext context)
         {
-            ApplicationResponse ?response  = null;
+            ApplicationResponse? response = null;
             var controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
             if (controllerActionDescriptor != null)
             {
+                var endpoint = context.HttpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IEndpointFeature>()?.Endpoint; // Updated to use IEndpointFeature
+                var hasAllowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null;
+
+                if (hasAllowAnonymous)
+                {
+                    return null; // Fixed return statement
+                }
+
                 var actionAttributes = controllerActionDescriptor.MethodInfo.GetCustomAttributes(inherit: true);
                 if (actionAttributes.Any(a => a is AllowAnonymousAttribute)) return null;
                 if (actionAttributes.Any(a => a is GuestAuthFilter))
@@ -27,9 +35,8 @@ namespace Auth
                 }
             }
 
-            //USER BASED AUTH
+            // USER BASED AUTH
             var dependencyScope = context.HttpContext.RequestServices;
-            //var userRepo = dependencyScope.GetService(typeof(IUserRepo)) as User.;
             var active_session = new SessionPayload();
 
             try
@@ -48,10 +55,10 @@ namespace Auth
                 context.HttpContext.Items["user_id"] = active_session.user_id;
                 context.HttpContext.Items["user_type_id"] = active_session.user_type_id;
 
-                //User from mongo
+                // User from mongo
                 var user = GetUser(active_session.user_email);
 
-                //If user is blocked/locked/inactivate. His session is terminated here.
+                // If user is blocked/locked/inactive. His session is terminated here.
                 if (user == null)
                 {
                     SessionManagement.ClearUpSpecificSessionOfUser(active_session.user_email);
