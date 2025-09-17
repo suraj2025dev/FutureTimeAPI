@@ -20,7 +20,7 @@ namespace FutureTime.Controllers
 
         public StripeWebhookController(IConfiguration configuration, ILogger<StripeWebhookController> logger)
         {
-            _webhookSecret = configuration["Stripe:WebhookSecret"];
+            _webhookSecret = AppStatic.CONFIG.App.Stripe.StripeWebHookToken;
             _logger = logger;
         }
 
