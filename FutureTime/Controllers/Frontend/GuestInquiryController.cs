@@ -464,7 +464,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     filters = Builders<StartInquiryProcessModel>.Filter.And(filters,
                                 Builders<StartInquiryProcessModel>.Filter.And(
-                                    Builders<StartInquiryProcessModel>.Filter.Regex("inquiry_number", Helper.Lib._BsonRegularExpression($"^{inquiry_number}$", "i"))
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_number", inquiry_number)
                                 )
                         );
                 }
