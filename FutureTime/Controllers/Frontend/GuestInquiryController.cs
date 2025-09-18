@@ -413,6 +413,7 @@ namespace FutureTime.Controllers.Backend
         public async Task<IActionResult> MyInquiries(string subsribed_on_from = null,
                                                         string subsribed_on_to = null,
                                                         string inquiry_number = null,
+                                                        string inquiry_id = null,
                                                         decimal? price_from = null,
                                                         decimal? price_to = null
                                                     )
@@ -465,6 +466,15 @@ namespace FutureTime.Controllers.Backend
                     filters = Builders<StartInquiryProcessModel>.Filter.And(filters,
                                 Builders<StartInquiryProcessModel>.Filter.And(
                                     Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_number", inquiry_number)
+                                )
+                        );
+                }
+
+                if (inquiry_id != null)
+                {
+                    filters = Builders<StartInquiryProcessModel>.Filter.And(filters,
+                                Builders<StartInquiryProcessModel>.Filter.And(
+                                    Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_id", inquiry_number)
                                 )
                         );
                 }

@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-using System.Text.Json.Serialization;
-
-namespace FutureTime.MongoDB.Model
+﻿namespace FutureTime.MongoDB.Model
 {
     public class GuestLoginData
     {
@@ -13,6 +9,7 @@ namespace FutureTime.MongoDB.Model
         public decimal tz { get; set; }
         public string dob { get; set; }
         public string tob { get; set; }
+        public string gender { get; set; }
         public bool is_login { get; set; }
     }
 

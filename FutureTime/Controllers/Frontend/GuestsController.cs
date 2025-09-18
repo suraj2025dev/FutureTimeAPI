@@ -151,7 +151,8 @@ namespace FutureTime.Controllers.Backend
                         created_date = DateTime.Now,
                         updated_date = DateTime.Now,
                         tz = data.tz,
-                        city= city
+                        city= city,
+                        gender = data.gender
                         //created_by = request.user_id,
                         //updated_by = request.user_id,
                     };
