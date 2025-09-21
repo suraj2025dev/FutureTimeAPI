@@ -425,6 +425,7 @@ namespace FutureTime.Controllers.Backend
                     city_id=item.city_id,
                     city=item.city,
                     tz=item.tz,
+                    gender = item.gender,
                     guest_profile = item.guest_profile == null ? null 
                         : new {
                             basic_description=item.guest_profile.basic_description,
@@ -494,7 +495,8 @@ namespace FutureTime.Controllers.Backend
                     .Set("updated_date", DateTime.Now)
                     .Set(u => u.updated_by, null)
                     .Set(u => u.tz, data.tz)
-                    .Set(u=>u.city,city);
+                    .Set(u=>u.city,city)
+                    .Set(u => u.gender, data.gender);
 
                 var result = await col.UpdateOneAsync(filter, update);
 
