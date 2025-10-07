@@ -2,6 +2,7 @@
 using AegisService.Lib.Filters;
 using FutureTime;
 using FutureTime.Filters;
+using FutureTime.Service;
 using FutureTime.StaticData;
 using Library.Data;
 using Microsoft.OpenApi.Models;
@@ -59,7 +60,7 @@ if (File.Exists(path))
 //}
 #endregion
 
-
+builder.Services.AddSingleton<FirebaseService>();
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();
 
@@ -135,7 +136,7 @@ builder.Services.AddMvc(option => {
 var app = builder.Build();
 
 app.UseCors("AllowAll");
-
+var firebase = app.Services.GetRequiredService<FirebaseService>();
 
 // Configure the HTTP request pipeline.
 if (true)

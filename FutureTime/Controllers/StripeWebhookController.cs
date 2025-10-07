@@ -17,11 +17,15 @@ namespace FutureTime.Controllers
     {
         private readonly string _webhookSecret;
         private readonly ILogger<StripeWebhookController> _logger;
-
-        public StripeWebhookController(IConfiguration configuration, ILogger<StripeWebhookController> logger)
+        private readonly FirebaseService _firebaseService;
+        public StripeWebhookController(
+            IConfiguration configuration, 
+            ILogger<StripeWebhookController> logger, 
+            FirebaseService firebaseService)
         {
             _webhookSecret = AppStatic.CONFIG.App.Stripe.StripeWebHookToken;
             _logger = logger;
+            _firebaseService = firebaseService;
         }
 
         [Route("callback")]
@@ -76,7 +80,11 @@ namespace FutureTime.Controllers
                     };
 
                     response.message = "Payment verified.";
-                    await new FirebaseService().PushNotificationAsync("Payment", "Payment was successfully received.", dict, inq.guest_id);
+                    var success = await _firebaseService.PushNotificationAsync("Payment", "Payment was successfully received.", dict, inq.guest_id);
+                    if(success)
+                    {
+                        Console.WriteLine("Payment successful for inquiry number {0}", inq.inquiry_number);
+                    }
                 }
                 else if (stripeEvent.Type == EventTypes.PaymentMethodAttached)
                 {
@@ -112,7 +120,12 @@ namespace FutureTime.Controllers
                         { "question", inq.inquiry_regular.question }
                     };
                     response.message = "Payment failed.";
-                    await new FirebaseService().PushNotificationAsync("Payment", "Payment has failed. Please try again.", dict, inq.guest_id);
+                    var success = await _firebaseService.PushNotificationAsync("Payment", "Payment has failed. Please try again.", dict, inq.guest_id);
+                    if (success)
+                    {
+                        Console.WriteLine("Payment failed");
+                    }
+
                 }
                 else
                 {

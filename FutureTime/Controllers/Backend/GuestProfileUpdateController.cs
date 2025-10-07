@@ -26,14 +26,18 @@ namespace FutureTime.Controllers.Backend
     {
         ApplicationResponse response;
         ApplicationRequest request;
+        private readonly FirebaseService _firebaseService;
 
-        public GuestProfileUpdateController(IHttpContextAccessor httpContextAccessor)
+        public GuestProfileUpdateController(
+            IHttpContextAccessor httpContextAccessor, 
+            FirebaseService firebaseService)
         {
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
             if (!new List<int> { 1, 2 }.Contains(request.user_type_id))//Only Admin & support
                 throw new ErrorException("Not allowed");
+            _firebaseService = firebaseService;
         }
 
         [HttpGet]
@@ -88,8 +92,12 @@ namespace FutureTime.Controllers.Backend
                 }
                 _ = MongoLogRecorder.RecordLogAsync<GuestsModel>(MongoDBService.COLLECTION_NAME.GuestsModel, data.guest_id, request.user_id);
 
-                await new FirebaseService().PushNotificationAsync("Profile Verified", "Your profile has been verified.", null, data.guest_id);
+                var success = await _firebaseService.PushNotificationAsync("Profile Verified", "Your profile has been verified.", null, data.guest_id);
 
+                if(!success)
+                {
+                    Console.WriteLine("GuestProfileUpdateController, Failed to send notification.");
+                }
                 //col.InsertOne(data);
                 response.message = "Guest profile updated.";
             }

@@ -19,12 +19,15 @@ namespace FutureTime.Controllers.Backend
     {
         ApplicationResponse response;
         ApplicationRequest request;
-
-        public InquiryManagementController(IHttpContextAccessor httpContextAccessor)
+        private readonly FirebaseService _firebaseService;
+        public InquiryManagementController(
+            IHttpContextAccessor httpContextAccessor, 
+            FirebaseService firebaseService)
         {
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
+            _firebaseService = firebaseService;
             //request.user_id = "123";
         }
 
@@ -358,7 +361,7 @@ namespace FutureTime.Controllers.Backend
                 dict.Add("inquiry_id", inq._id);
                 dict.Add("inquiry_number", inq.inquiry_number);
                 dict.Add("question", inq.inquiry_regular.question);
-                await new FirebaseService().PushNotificationAsync("Inquiry", "You got a reply.", dict, inq.guest_id);
+                var success = await _firebaseService.PushNotificationAsync("Inquiry", "You got a reply.", dict, inq.guest_id);
 
                 response.message = "Published to the user.";
 
