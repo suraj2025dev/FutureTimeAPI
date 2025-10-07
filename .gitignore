@@ -353,3 +353,4 @@ MigrationBackup/
 .ionide/
 /FutureTime/appsettings.json
 /FutureTime/Configuration.json
+/FutureTime/firebase-service-account.json
