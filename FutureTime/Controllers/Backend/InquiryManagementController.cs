@@ -136,15 +136,10 @@ namespace FutureTime.Controllers.Backend
                                 s.inquiry_regular.auspicious_from_date,
                                 s.inquiry_regular.horoscope_from_date,
                                 s.inquiry_regular.category_type_id,
-                                //reading_activity=s.inquiry_regular.reading_activity.Select(s=>new List<InquiryReading>() { }),
-                                //is_replied = s.inquiry_state == INQUIRY_STATE.Published ? true : false,
-                                //s.is_read,
                                 assignee = GetUsers(s.assignee_id)==null?"":GetUsers(s.assignee_id).name,//TODO
                                 s.comment_for_assignee,
                                 s.final_reading,
                                 s.created_date,
-                                //s.created_by,
-                                //s.updated_by,
                                 s.updated_date,
                                 s.vedic_api_response_list
                             }).ToList();
