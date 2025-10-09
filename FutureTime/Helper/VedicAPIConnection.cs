@@ -85,7 +85,7 @@ namespace FutureTime.Helper
             }
 
             public static async Task<JsonElement> GetPanchang(
-                     DateTime dateOfBirth,
+                    DateTime dateOfBirth,
                     string timeOfBirth,
                     string latitude,
                     string longitude,

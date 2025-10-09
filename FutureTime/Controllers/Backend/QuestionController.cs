@@ -1,23 +1,15 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
-using FutureTime.MongoDB.Model;
+﻿using FutureTime.Helper;
 using FutureTime.MongoDB;
-using Library.Extensions;
-using Library.Exceptions;
-using FutureTime.StaticData;
-using MongoDB.Bson;
-using Microsoft.VisualBasic;
-using FutureTime.Helper;
 using FutureTime.MongoDB.Data;
+using FutureTime.MongoDB.Model;
+using FutureTime.StaticData;
+using Library.Data;
+using Library.Exceptions;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -32,11 +24,11 @@ namespace FutureTime.Controllers.Backend
             response = new ApplicationResponse();
             request = new ApplicationRequest();
             request = httpContextAccessor.FillSessionDetail(request);
-            if (!new List<int> { 1,2}.Contains(request.user_type_id))//Only Admin & support
+            if (!new List<int> { 1, 2 }.Contains(request.user_type_id))//Only Admin & support
                 throw new ErrorException("Not allowed");
         }
 
-        
+
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> InsertAsync([FromBody] QuestionModel data)
@@ -87,7 +79,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Question with same description already exists.");
                 }
 
-                if(data.question == null || data.question == "")
+                if (data.question == null || data.question == "")
                 {
                     throw new ErrorException("Please provide question.");
                 }
@@ -124,7 +116,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+
         [HttpGet]
         [Route("loadbasedata")]
         public async Task<IActionResult> LoadBaseDataAsync()
@@ -135,9 +127,10 @@ namespace FutureTime.Controllers.Backend
                 var category_list = MongoDBService.ConnectCollection<QuestionCategoryModel>(MongoDBService.COLLECTION_NAME.QuestionCategoryModel);
 
                 var category_items = await category_list.Find(new BsonDocument()).ToListAsync();
-                response.data.Add("question_category_items", category_items.ToList().Select(s=>new { 
+                response.data.Add("question_category_items", category_items.ToList().Select(s => new
+                {
                     question_category_id = s._id,
-                    question_category = FTStaticData.GetName(STATIC_DATA_TYPE.CATEGORY_TYPE,s.category_type_id.ToString())+" : "+s.category
+                    question_category = FTStaticData.GetName(STATIC_DATA_TYPE.CATEGORY_TYPE, s.category_type_id.ToString()) + " : " + s.category
                 }).ToList());
             }
             catch (Exception ex)
@@ -149,7 +142,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] QuestionModel data)
@@ -212,7 +205,7 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please choose valid question category.");
                 }
 
-                if(data.price == null || data.price < 0)
+                if (data.price == null || data.price < 0)
                 {
                     throw new ErrorException("Please enter valid price.");
                 }
@@ -230,7 +223,7 @@ namespace FutureTime.Controllers.Backend
                      .Set(u => u.order_id, data.order_id)
                      .Set(u => u.price_before_discount, data.price_before_discount)
                      .Set(u => u.is_initial_offerings, data.is_initial_offerings)
-                     .Set(u=> u.image_blob,data.image_blob)
+                     .Set(u => u.image_blob, data.image_blob)
                      .Set(u => u.is_bundle, data.is_bundle)
                      .Set(u => u.effective_from, data.effective_from)
                      .Set(u => u.effective_to, data.effective_to)
@@ -238,7 +231,7 @@ namespace FutureTime.Controllers.Backend
                      .Set("updated_date", DateTime.Now)
                      .Set("updated_by", request.user_id);
 
-                if(data.image_blob!=null && data.image_blob != "")
+                if (data.image_blob != null && data.image_blob != "")
                 {
                     update.Set(u => u.image_blob, data.image_blob);
                 }
@@ -264,7 +257,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList(GetAllQuestionsData data)
@@ -289,7 +282,7 @@ namespace FutureTime.Controllers.Backend
                 }
                 if (data.question_category_id != null)
                 {
-                    filters.Add(Builders<QuestionModel>.Filter.Eq(doc => doc.question_category_id,   data.question_category_id));
+                    filters.Add(Builders<QuestionModel>.Filter.Eq(doc => doc.question_category_id, data.question_category_id));
                 }
                 if (data.active != null)
                 {
@@ -405,13 +398,13 @@ namespace FutureTime.Controllers.Backend
                     active = doc["active"].AsBoolean,
                     price = Convert.ToDecimal(doc["price"].AsString),
                     question_category_name = doc.GetValue("category_name", BsonNull.Value)?.AsString,
-                    price_before_discount= Convert.ToDecimal(doc["price_before_discount"].AsString),
-                    is_initial_offerings = (doc["is_initial_offerings"].AsBoolean),
-                    is_bundle = (doc["is_bundle"].AsBoolean),
+                    price_before_discount = doc.Contains("price_before_discount")? Convert.ToDecimal(doc["price_before_discount"].AsString): 0M,
+                    is_initial_offerings = doc.Contains("is_initial_offerings") ? doc["is_initial_offerings"].AsBoolean : false,
+                    is_bundle = doc.Contains("is_bundle") ? (doc["is_bundle"].AsBoolean) : false,
                     image_blob = doc.GetValue("image_blob", BsonNull.Value).IsBsonNull ? (string?)null : doc.GetValue("image_blob", BsonNull.Value)?.AsString,
                     effective_from = doc.GetValue("effective_from", BsonNull.Value).IsBsonNull ? (string?)null : doc.GetValue("effective_from", BsonNull.Value)?.AsString,
                     effective_to = doc.GetValue("effective_to", BsonNull.Value).IsBsonNull ? (string?)null : doc.GetValue("effective_to", BsonNull.Value)?.AsString,
-                    discount_amount = Convert.ToDecimal(doc["discount_amount"].AsString),
+                    discount_amount = doc.Contains("discount_amount") ? Convert.ToDecimal(doc["discount_amount"].AsString) : 0M,
                 }).ToList();
 
                 var countPipeline = new[]
@@ -437,7 +430,7 @@ namespace FutureTime.Controllers.Backend
 
         }
 
-        
+
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)
