@@ -13,7 +13,7 @@ namespace FutureTime.MongoDB.Model
     public enum INQUIRY_STATUS
     {
         Pending = 1,
-        Completed=2
+        Completed = 2
         //Cancelled=3
     }
 
@@ -61,6 +61,11 @@ namespace FutureTime.MongoDB.Model
         public bool active { get; set; }
     }
 
+    public class InquiryRejection
+    {
+        public string reason { get; set; }
+    }
+
     public class InquiryReading
     {
         public string assignee_id { get; set; }
@@ -79,6 +84,7 @@ namespace FutureTime.MongoDB.Model
         public string publish_content { get; set; }
         //Validate Active
         public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update
+        public List<InquiryRejection> rejection_activity { get; set; }
     }
 
     public class InquiryBundle

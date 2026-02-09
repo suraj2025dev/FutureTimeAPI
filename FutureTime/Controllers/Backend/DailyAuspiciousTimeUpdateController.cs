@@ -1,29 +1,31 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
-using FutureTime.MongoDB.Model;
+﻿using FutureTime.Helper;
 using FutureTime.MongoDB;
-using Library.Extensions;
-using Library.Exceptions;
+using FutureTime.MongoDB.Model;
 using FutureTime.StaticData;
+using Library.Data;
+using Library.Exceptions;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using FutureTime.Helper;
+using MongoDB.Driver;
 
 namespace FutureTime.Controllers.Backend
 {
+    /// <summary>
+    /// Controller for managing daily auspicious time updates, including creation, update, retrieval, and base data loading.
+    /// Only accessible by Admin and Support user types.
+    /// </summary>
     [Route("backend/[controller]")]
     public class DailyAuspiciousTimeUpdateController : ControllerBase
     {
         ApplicationResponse response;
         ApplicationRequest request;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DailyAuspiciousTimeUpdateController"/> class.
+        /// Sets up the response and request objects, and ensures only Admin and Support user types can access this controller.
+        /// </summary>
+        /// <param name="httpContextAccessor">Provides access to the current HTTP context.</param>
         public DailyAuspiciousTimeUpdateController(IHttpContextAccessor httpContextAccessor)
         {
             response = new ApplicationResponse();
@@ -34,6 +36,13 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Inserts a new daily auspicious time update entry.
+        /// Validates the transaction date and rashi details, ensures no duplicate entry for the date,
+        /// and saves the data to the database. Only accessible by Admin and Support user types.
+        /// </summary>
+        /// <param name="data">The daily auspicious time update model containing transaction date and rashi details.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the operation result and message.</returns>
         [HttpPost]
         [Route("create")]
         public IActionResult Insert([FromBody] DailyAuspiciousTimeUpdateModel data)
@@ -90,6 +99,10 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Loads the base data required for daily auspicious time updates, specifically the list of rashis.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> containing the base data for daily auspicious time updates.</returns>
         [HttpGet]
         [Route("loadbasedata")]
         public IActionResult LoadBaseData()
@@ -109,6 +122,13 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Updates an existing daily auspicious time update entry.
+        /// Validates the transaction date, rashi details, and entry id, then updates the data in the database.
+        /// Only accessible by Admin and Support user types.
+        /// </summary>
+        /// <param name="data">The daily auspicious time update model containing transaction date, rashi details, and entry id.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the operation result and message.</returns>
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] DailyAuspiciousTimeUpdateModel data)
@@ -174,6 +194,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves the list of all daily auspicious time update entries.
+        /// Each entry includes user-friendly names for the creator and updater.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> containing the list of daily auspicious time update entries.</returns>
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList()
@@ -201,6 +226,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves a specific daily auspicious time update entry by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the daily auspicious time update entry.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the requested daily auspicious time update entry.</returns>
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)

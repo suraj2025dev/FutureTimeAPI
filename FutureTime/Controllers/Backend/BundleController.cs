@@ -1,33 +1,27 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
+﻿using FutureTime.MongoDB;
 using FutureTime.MongoDB.Model;
-using FutureTime.MongoDB;
-using Library.Extensions;
+using Library.Data;
 using Library.Exceptions;
-using FutureTime.StaticData;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using Microsoft.VisualBasic;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.ObjectModel;
-using SharpCompress.Common;
-using Amazon.Runtime.Internal.Transform;
+using MongoDB.Driver;
 
 namespace FutureTime.Controllers.Backend
 {
+    /// <summary>
+    /// Controller for managing Bundle entities in the backend. Provides endpoints for creating, updating, retrieving, and listing bundles.
+    /// </summary>
     [Route("backend/[controller]")]
     public class BundleController : ControllerBase
     {
         ApplicationResponse response;
         ApplicationRequest request;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BundleController"/> class with the specified HTTP context accessor.
+        /// </summary>
+        /// <param name="httpContextAccessor">The HTTP context accessor used to fill session details.</param>
         public BundleController(IHttpContextAccessor httpContextAccessor)
         {
             response = new ApplicationResponse();
@@ -38,6 +32,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Creates a new Bundle entity in the database.
+        /// </summary>
+        /// <param name="data">The BundleModel object containing the details of the bundle to create.</param>
+        /// <returns>An IActionResult containing the result of the create operation.</returns>
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> InsertAsync([FromBody] BundleModel data)
@@ -80,6 +79,10 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Loads base data required for bundle creation, including question categories and questions for auspicious time.
+        /// </summary>
+        /// <returns>An IActionResult containing the base data for bundles.</returns>
         [HttpGet]
         [Route("loadbasedata")]
         public async Task<IActionResult> LoadBaseDataAsync()
@@ -117,6 +120,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Updates an existing Bundle entity in the database.
+        /// </summary>
+        /// <param name="data">The BundleModel object containing the updated details of the bundle.</param>
+        /// <returns>An IActionResult containing the result of the update operation.</returns>
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] BundleModel data)
@@ -139,9 +147,6 @@ namespace FutureTime.Controllers.Backend
                 }
                 #endregion
 
-
-
-                
                 var id = new ObjectId(data._id);
                 var filter = Builders<BundleModel>.Filter.Eq("_id", id);
 
@@ -153,7 +158,6 @@ namespace FutureTime.Controllers.Backend
                 {
                     { "name", data.name },
                     { "description", data.description },
-                    //{ "image_blob", data.image_blob },
                     { "effective_from", data.effective_from },
                     { "effective_to", data.effective_to },
                     { "active", data.active },
@@ -196,6 +200,10 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves a list of all Bundle entities from the database.
+        /// </summary>
+        /// <returns>An IActionResult containing the list of all bundles.</returns>
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList()
@@ -203,7 +211,6 @@ namespace FutureTime.Controllers.Backend
             try
             {
                 var col = MongoDBService.ConnectCollection<BundleModel>(MongoDBService.COLLECTION_NAME.BundleModel);
-
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
 
@@ -219,6 +226,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves a specific Bundle entity from the database by its identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the bundle to retrieve.</param>
+        /// <returns>An IActionResult containing the requested bundle entity.</returns>
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)

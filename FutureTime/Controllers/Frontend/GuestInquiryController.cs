@@ -10,6 +10,7 @@ using MongoDB.Bson;
 using System.Text.RegularExpressions;
 using FutureTime.MongoDB.Data;
 using Stripe;
+using FutureTime.Helper;
 
 namespace FutureTime.Controllers.Backend
 {
@@ -97,6 +98,8 @@ namespace FutureTime.Controllers.Backend
 
                 #endregion
 
+                var codeGenerator = new DailyCodeGenerator();
+
                 var current_date = DateTime.Now;
                 //Validation & Data Filling
                 var new_inquiry = new StartInquiryProcessModel
@@ -111,7 +114,7 @@ namespace FutureTime.Controllers.Backend
                     inquiry_type = dto.inquiry_type,
                     inquiry_bundle = null,
                     inquiry_regular = null,
-                    inquiry_number = Guid.NewGuid().ToString().Replace("-", ""),
+                    inquiry_number = codeGenerator.GenerateDailyCode(),
                     is_read = false,
                     profile1 = dto.profile1,
                     profile2 = dto.profile2,

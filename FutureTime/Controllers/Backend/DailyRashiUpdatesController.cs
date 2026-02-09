@@ -1,29 +1,32 @@
-﻿using FutureTime.Filters;
-using Auth;
-using Library;
-using Library.Data;
-using Microsoft.AspNetCore.Mvc;
-using User;
-using User.Data;
-using static System.Net.WebRequestMethods;
-using MongoDB.Driver;
-using static Dapper.SqlMapper;
-using FutureTime.MongoDB.Model;
+﻿using FutureTime.Helper;
 using FutureTime.MongoDB;
-using Library.Extensions;
-using Library.Exceptions;
+using FutureTime.MongoDB.Model;
 using FutureTime.StaticData;
+using Library.Data;
+using Library.Exceptions;
+using Library.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using FutureTime.Helper;
+using MongoDB.Driver;
 
 namespace FutureTime.Controllers.Backend
 {
+    /// <summary>
+    /// Controller for managing daily Rashi (horoscope) updates in the backend.
+    /// Provides endpoints for creating, updating, retrieving, and listing daily horoscope updates.
+    /// Only accessible by Admin and Support user types.
+    /// </summary>
     [Route("backend/[controller]")]
     public class DailyRashiUpdatesController : ControllerBase
     {
         ApplicationResponse response;
         ApplicationRequest request;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DailyRashiUpdatesController"/> class.
+        /// Ensures that only Admin and Support user types can access the controller.
+        /// </summary>
+        /// <param name="httpContextAccessor">The HTTP context accessor used to fill session details.</param>
         public DailyRashiUpdatesController(IHttpContextAccessor httpContextAccessor)
         {
             response = new ApplicationResponse();
@@ -34,6 +37,13 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Inserts a new daily Rashi (horoscope) update.
+        /// Validates the input data, ensures all 12 rashi details are provided, and saves the update for the specified transaction date.
+        /// Throws an error if the transaction date already exists or if the input is invalid.
+        /// </summary>
+        /// <param name="data">The daily horoscope update data to insert.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the operation result.</returns>
         [HttpPost]
         [Route("create")]
         public IActionResult Insert([FromBody] DailyHoroscopeUpdatesModel data)
@@ -89,6 +99,10 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Loads the base data required for daily Rashi updates, such as the list of Rashis.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> containing the base data for daily Rashi updates.</returns>
         [HttpGet]
         [Route("loadbasedata")]
         public IActionResult LoadBaseData()
@@ -108,6 +122,13 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Updates an existing daily Rashi (horoscope) update.
+        /// Validates the input data, ensures all 12 rashi details are provided, and updates the update for the specified transaction date.
+        /// Throws an error if the transaction date is invalid, the id is missing, or if the input is invalid.
+        /// </summary>
+        /// <param name="data">The daily horoscope update data to update.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the operation result.</returns>
         [HttpPost]
         [Route("Update")]
         public async Task<IActionResult> UpdateAsync([FromBody] DailyHoroscopeUpdatesModel data)
@@ -170,6 +191,10 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves the list of all daily Rashi (horoscope) updates.
+        /// </summary>
+        /// <returns>An <see cref="IActionResult"/> containing the list of daily Rashi updates.</returns>
         [HttpGet]
         [Route("GetAllList")]
         public async Task<IActionResult> GetAllList()
@@ -198,6 +223,11 @@ namespace FutureTime.Controllers.Backend
         }
 
         
+        /// <summary>
+        /// Retrieves a specific daily Rashi (horoscope) update by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the daily Rashi update to retrieve.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the requested daily Rashi update.</returns>
         [HttpGet]
         [Route("Get")]
         public async Task<IActionResult> Get(string id)
@@ -221,6 +251,5 @@ namespace FutureTime.Controllers.Backend
             return Ok(response);
 
         }
-
     }
 }

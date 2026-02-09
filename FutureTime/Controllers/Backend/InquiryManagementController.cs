@@ -373,8 +373,13 @@ namespace FutureTime.Controllers.Backend
         [HttpPost]
         [Route("RejectInquiry")]
 
-        public async Task<IActionResult> RejectInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
+        public async Task<IActionResult> RejectInquiry([FromBody] RejectInquiryDTO dto)
         {
+            if(string.IsNullOrEmpty(dto.comment))
+            {
+                throw new ErrorException("Comment is required for rejection.");
+            }
+
             try
             {
                 var col = MongoDBService.ConnectCollection<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel);
@@ -390,7 +395,13 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Sorry, published inquiry can not be rejected.");
                 }
 
+                var rejection_activity = new InquiryRejection
+                {
+                    reason = dto.comment
+                };
+
                 var update = Builders<StartInquiryProcessModel>.Update
+                    .Push(i => i.inquiry_regular.rejection_activity, rejection_activity)  // Push to rejection_activity array
                     .Set(i => i.inquiry_status, INQUIRY_STATUS.Pending)
                     .Set(i => i.inquiry_state, INQUIRY_STATE.Rejected)
                     .Set(i => i.updated_by, request.user_id)
@@ -403,7 +414,6 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
                 _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
-
 
                 response.message = "Rejected an inquiry.";
 
