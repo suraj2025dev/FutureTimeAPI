@@ -98,6 +98,29 @@ namespace FutureTime.Controllers.Backend
 
         }
 
+        /// <summary>
+        /// Bulk Inserts a new daily Rashi (horoscope) update.
+        /// Validates the input data, ensures all 12 rashi details are provided, and saves the update for the specified transaction date.
+        /// Throws an error if the transaction date already exists or if the input is invalid.
+        /// </summary>
+        /// <param name="csvFile">The daily horoscope CsvFile.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the operation result.</returns>
+        [HttpPost]
+        [Route("import")]
+        public async Task<IActionResult> BulkInsert(IFormFile csvFile)
+        {
+            try
+            {
+                var importer = new CsvImporter();
+                await importer.ImportAsync(csvFile);
+                response.message = "Daily Rashi Updates imported successfully.";
+            }
+            catch (Exception ex)
+            {
+                response = ex.GenerateResponse();
+            }
+            return Ok(response);
+        }
         
         /// <summary>
         /// Loads the base data required for daily Rashi updates, such as the list of Rashis.
