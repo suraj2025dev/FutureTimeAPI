@@ -141,7 +141,8 @@ namespace FutureTime.Controllers.Backend
                                 s.final_reading,
                                 s.created_date,
                                 s.updated_date,
-                                s.vedic_api_response_list
+                                s.vedic_api_response_list,
+                                s.inquiry_regular.rejection_activity.OrderByDescending(a => a.RejectedOnUtc).First()?.reason
                             }).ToList();
                 var totalCount = await col.CountDocumentsAsync(filters);
                 response.data.Add("list", items);
@@ -397,7 +398,8 @@ namespace FutureTime.Controllers.Backend
 
                 var rejection_activity = new InquiryRejection
                 {
-                    reason = dto.comment
+                    reason = dto.comment,
+                    RejectedOnUtc = DateTime.UtcNow
                 };
 
                 var update = Builders<StartInquiryProcessModel>.Update

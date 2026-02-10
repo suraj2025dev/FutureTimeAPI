@@ -63,6 +63,7 @@ namespace FutureTime.MongoDB.Model
 
     public class InquiryRejection
     {
+        public DateTime RejectedOnUtc { get; set; }
         public string reason { get; set; }
     }
 
