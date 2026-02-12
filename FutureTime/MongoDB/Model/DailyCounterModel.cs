@@ -1,13 +1,13 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Specialized;
 
 namespace FutureTime.MongoDB.Model
 {
     public class DailyCounterModel
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? _id { get; set; }
+        public string date { get; set; } = default!;
         public int counter { get; set; }
     }
 }

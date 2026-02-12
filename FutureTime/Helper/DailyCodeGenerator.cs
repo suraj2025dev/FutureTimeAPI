@@ -12,9 +12,11 @@ namespace FutureTime.Helper
 
             var col = MongoDBService.ConnectCollection<DailyCounterModel>(MongoDBService.COLLECTION_NAME.DailyCounterModel);
             var filters = Builders<DailyCounterModel>.Filter.And(
-                                    Builders<DailyCounterModel>.Filter.Eq(x => x._id, today));
+                                    Builders<DailyCounterModel>.Filter.Eq(x => x.date, today));
 
-            var update = Builders<DailyCounterModel>.Update.Inc(x => x.counter, 1);
+            var update = Builders<DailyCounterModel>.Update
+                .SetOnInsert(x => x.date, today)
+                .Inc(x => x.counter, 1);
 
             var options = new FindOneAndUpdateOptions<DailyCounterModel>
             {
