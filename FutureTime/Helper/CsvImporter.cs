@@ -7,7 +7,7 @@ namespace FutureTime.Helper
 {
     public class CsvImporter
     {
-        public async Task ImportAsync(IFormFile csvFile)
+        public async Task ImportAsync(IFormFile csvFile, string userId = "")
         { 
             if(csvFile == null || csvFile.Length == 0)
                 throw new InvalidOperationException("CSV file is empty.");
@@ -100,7 +100,11 @@ namespace FutureTime.Helper
                         rashi_id = row.RashiId,
                         rating = row.Rating,
                         description = row.Description
-                    }).ToList()
+                    }).ToList(),
+                    created_by = userId,
+                    created_date = DateTime.Now,
+                    updated_by = userId,
+                    updated_date = DateTime.Now
                 };
 
                 await _collection.InsertOneAsync(dailyUpdate);

@@ -112,7 +112,7 @@ namespace FutureTime.Controllers.Backend
             try
             {
                 var importer = new CsvImporter();
-                await importer.ImportAsync(csvFile);
+                await importer.ImportAsync(csvFile, request.user_id);
                 response.message = "Daily Rashi Updates imported successfully.";
             }
             catch (Exception ex)

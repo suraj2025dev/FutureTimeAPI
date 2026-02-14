@@ -21,7 +21,7 @@ namespace FutureTime.Controllers.Backend
         ApplicationRequest request;
         private readonly FirebaseService _firebaseService;
         public InquiryManagementController(
-            IHttpContextAccessor httpContextAccessor, 
+            IHttpContextAccessor httpContextAccessor,
             FirebaseService firebaseService)
         {
             response = new ApplicationResponse();
@@ -35,7 +35,7 @@ namespace FutureTime.Controllers.Backend
         [Route("GetInquiries")]
 
         public async Task<IActionResult> GetInquiries(
-            string inquiry_state = null, 
+            string inquiry_state = null,
             string inquiry_status = null,
             string inquiry_number = null,
             string inquiry_date = null,//YYYY-MM-DD
@@ -58,7 +58,7 @@ namespace FutureTime.Controllers.Backend
                                     Builders<StartInquiryProcessModel>.Filter.Eq("active", true)
                                 );
 
-                if(inquiry_state != null)
+                if (inquiry_state != null)
                 {
                     var _inquiry_state = GetEnumFromStatus(inquiry_state);
                     filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_state", _inquiry_state);
@@ -100,7 +100,7 @@ namespace FutureTime.Controllers.Backend
 
                 if (category_type_id != null)
                 {
-                   filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq(x => x.inquiry_regular.category_type_id, category_type_id);
+                    filters = filters & Builders<StartInquiryProcessModel>.Filter.Eq(x => x.inquiry_regular.category_type_id, category_type_id);
                 }
 
                 if (question_id != null)
@@ -136,13 +136,13 @@ namespace FutureTime.Controllers.Backend
                                 s.inquiry_regular.auspicious_from_date,
                                 s.inquiry_regular.horoscope_from_date,
                                 s.inquiry_regular.category_type_id,
-                                assignee = GetUsers(s.assignee_id)==null?"":GetUsers(s.assignee_id).name,//TODO
+                                assignee = s.assignee_id == null ? "" : GetUsers(s.assignee_id)?.name,
                                 s.comment_for_assignee,
                                 s.final_reading,
                                 s.created_date,
                                 s.updated_date,
                                 s.vedic_api_response_list,
-                                s.inquiry_regular.rejection_activity.OrderByDescending(a => a.RejectedOnUtc).First()?.reason
+                                reason = s.inquiry_regular.rejection_activity != null ? s.inquiry_regular.rejection_activity.OrderByDescending(a => a.RejectedOnUtc).FirstOrDefault()?.reason : ""
                             }).ToList();
                 var totalCount = await col.CountDocumentsAsync(filters);
                 response.data.Add("list", items);
@@ -159,7 +159,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("ChangeAssignee")]
-        
+
         public async Task<IActionResult> ChangeAssignee([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -180,7 +180,8 @@ namespace FutureTime.Controllers.Backend
                 if (assignee.user_type_id == 3)
                 {
                     new_state = INQUIRY_STATE.Expert;
-                }else if(assignee.user_type_id == 4)
+                }
+                else if (assignee.user_type_id == 4)
                 {
                     new_state = INQUIRY_STATE.Translator;
                 }
@@ -207,7 +208,7 @@ namespace FutureTime.Controllers.Backend
                 {
                     throw new ErrorException("Please provide valid id for update operation.");
                 }
-                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id , request.user_id);
+                _ = MongoLogRecorder.RecordLogAsync<StartInquiryProcessModel>(MongoDBService.COLLECTION_NAME.StartInquiryProcessModel, dto.inquiry_id, request.user_id);
 
                 response.message = "Inquiry Assigned.";
 
@@ -223,7 +224,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("PushComment")]
-        
+
         public async Task<IActionResult> PushComment([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -236,12 +237,12 @@ namespace FutureTime.Controllers.Backend
                                 );
                 var item = col.Find(filters).FirstOrDefault();
 
-                if(item.inquiry_status == INQUIRY_STATUS.Completed)
+                if (item.inquiry_status == INQUIRY_STATUS.Completed)
                 {
                     throw new ErrorException("Can not post comment in completed inquiry");
                 }
 
-                if(col.Find(filters).FirstOrDefault().assignee_id != request.user_id)
+                if (col.Find(filters).FirstOrDefault().assignee_id != request.user_id)
                 {
                     throw new ErrorException("Assigned person must push the comment.");
                 }
@@ -281,7 +282,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetCommentHistory")]
-        
+
         public async Task<IActionResult> GetCommentHistory(string inquiry_id)
         {
             try
@@ -295,11 +296,12 @@ namespace FutureTime.Controllers.Backend
 
                 var item = col.Find(filters).FirstOrDefault();
 
-                var comment = item.inquiry_regular.reading_activity.Select(s => new { 
+                var comment = item.inquiry_regular.reading_activity.Select(s => new
+                {
                     assignee = GetUsers(s.assignee_id) == null ? "" : GetUsers(s.assignee_id).name,
                     s.description,
                     s.updated_on
-                }).OrderByDescending(o=>o.updated_on).ToList();
+                }).OrderByDescending(o => o.updated_on).ToList();
 
                 response.data.Add("comment", comment);
 
@@ -316,7 +318,7 @@ namespace FutureTime.Controllers.Backend
 
         [HttpPost]
         [Route("PublishInquiry")]
-        
+
         public async Task<IActionResult> PublishInquiry([FromBody] ChangeInquiryAssigneeDTO dto)
         {
             try
@@ -376,7 +378,7 @@ namespace FutureTime.Controllers.Backend
 
         public async Task<IActionResult> RejectInquiry([FromBody] RejectInquiryDTO dto)
         {
-            if(string.IsNullOrEmpty(dto.comment))
+            if (string.IsNullOrEmpty(dto.comment))
             {
                 throw new ErrorException("Comment is required for rejection.");
             }
@@ -391,7 +393,7 @@ namespace FutureTime.Controllers.Backend
                                 );
 
                 var inq = col.Find(filters).FirstOrDefault();
-                if(inq.inquiry_state == INQUIRY_STATE.Published)
+                if (inq.inquiry_state == INQUIRY_STATE.Published)
                 {
                     throw new ErrorException("Sorry, published inquiry can not be rejected.");
                 }
@@ -432,12 +434,12 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetAssigneeList")]
-        
+
         public async Task<IActionResult> GetAssigneeList()
         {
             try
             {
-                var user_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.USER_TYPE).Select(s => s.list).First().Where(w=>int.Parse(w.id) >=3).ToList();
+                var user_type = FTStaticData.data.Where(w => w.type == STATIC_DATA_TYPE.USER_TYPE).Select(s => s.list).First().Where(w => int.Parse(w.id) >= 3).ToList();
 
                 response.data.Add("user_type", user_type);
 
@@ -445,7 +447,7 @@ namespace FutureTime.Controllers.Backend
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
 
-                response.data.Add("user", items.Where(w=>w.user_type_id>=3).ToList());
+                response.data.Add("user", items.Where(w => w.user_type_id >= 3).ToList());
             }
             catch (Exception ex)
             {
@@ -458,12 +460,12 @@ namespace FutureTime.Controllers.Backend
 
         [HttpGet]
         [Route("GetInquiriyByNumber")]
-        
+
         public async Task<IActionResult> GetInquiriyByNumber(string inquiry_number)
-        { 
+        {
             try
             {
-                
+
                 var filters = Builders<StartInquiryProcessModel>.Filter.And(
                                     Builders<StartInquiryProcessModel>.Filter.Eq("inquiry_number", inquiry_number)
                                 );
@@ -490,7 +492,7 @@ namespace FutureTime.Controllers.Backend
                                         s.vedic_api_response_list
                                     }).OrderByDescending(o => o.purchased_on).ToList();
 
-                if(items.Count() == 0)
+                if (items.Count() == 0)
                 {
                     throw new ErrorException("Inquiry not found.");
                 }
@@ -521,7 +523,8 @@ namespace FutureTime.Controllers.Backend
 
                 var items = await col.Find(new BsonDocument()).ToListAsync();
 
-                response.data.Add("assignee_list", items.Where(w => w.user_type_id >= 3).Select(s => new { 
+                response.data.Add("assignee_list", items.Where(w => w.user_type_id >= 3).Select(s => new
+                {
                     s._id,
                     s.name,
                     s.user_type_id
@@ -613,7 +616,7 @@ namespace FutureTime.Controllers.Backend
 
                 var vedic_api_response = item.vedic_api_response_list;
 
-                if(vedic_api_response == null)
+                if (vedic_api_response == null)
                 {
                     vedic_api_response = new List<VedicAPIResponse>();
                 }
@@ -621,7 +624,7 @@ namespace FutureTime.Controllers.Backend
 
                 if (vedic_api_type_id == "1")
                 {
-                    var a= await VedicAPIConnection.APICall.GetPlanetDetail(
+                    var a = await VedicAPIConnection.APICall.GetPlanetDetail(
                             DateTime.Now,
                             item.profile1.tob,
                             item.profile1.city.lat,
@@ -629,7 +632,7 @@ namespace FutureTime.Controllers.Backend
                             item.profile1.tz.ToString()
                         );
 
-                    
+
                     var index = vedic_api_response.FindIndex(f => f.vedic_api_type_id == vedic_api_type_id);
                     if (index > -1)
                     {
@@ -826,7 +829,7 @@ namespace FutureTime.Controllers.Backend
             }
         }
 
-        private UsersModel GetUsers(string user_id)
+        private UsersModel? GetUsers(string? user_id)
         {
             if (user_id == null) return null;
             var col = MongoDBService.ConnectCollection<UsersModel>(MongoDBService.COLLECTION_NAME.UsersModel);
