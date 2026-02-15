@@ -85,7 +85,9 @@ namespace FutureTime.MongoDB.Model
         public string publish_content { get; set; }
         //Validate Active
         public List<InquiryReading> reading_activity { get; set; }// Only Assignee person can update
-        public List<InquiryRejection> rejection_activity { get; set; }
+
+        [BsonIgnoreIfNull]
+        public List<InquiryRejection> rejection_activity { get; set; } = new List<InquiryRejection>();
     }
 
     public class InquiryBundle

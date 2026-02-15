@@ -398,6 +398,16 @@ namespace FutureTime.Controllers.Backend
                     throw new ErrorException("Sorry, published inquiry can not be rejected.");
                 }
 
+                // --- CONDITIONAL LOGIC FOR NULL ARRAY ---
+                // If the database has an explicit 'null' for this field, we must reset it to an empty array
+                // so that the .Push() operator doesn't crash.
+                if (inq.inquiry_regular?.rejection_activity == null)
+                {
+                    var initUpdate = Builders<StartInquiryProcessModel>.Update.Set(i => i.inquiry_regular.rejection_activity, new List<InquiryRejection>());
+                    await col.UpdateOneAsync(filters, initUpdate);
+                }
+                // ----------------------------------------
+
                 var rejection_activity = new InquiryRejection
                 {
                     reason = dto.comment,
